@@ -1,0 +1,10 @@
+data/raw/
+data/*.csv
+outputs/
+*.csv
+!docs/*.csv
+__pycache__/
+.pytest_cache/
+*.egg-info/
+.env
+*.pdf.bak
