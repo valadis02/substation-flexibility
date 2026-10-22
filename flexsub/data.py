@@ -133,6 +133,7 @@ def _hourly_from_hdf(store, key, chunk=4_000_000, min_rows_per_hour=300):
         if len(ch) == 0:
             break
         s = ch.iloc[:, 0].astype(float)
+        s.index = s.index.tz_convert("UTC") if s.index.tz is not None else s.index.tz_localize("UTC")
         g = s.resample("1h")
         sums.append(g.sum()); cnts.append(g.count())
         start += chunk
@@ -176,7 +177,10 @@ def save_processed(d, out_dir):
 def load_processed(dataset_dir):
     """Read what save_processed wrote. Returns dict(W, appliances, weather or None)."""
     import os
-    rd = lambda f: pd.read_csv(f, index_col="timestamp", parse_dates=["timestamp"])
+    def rd(f):
+        df = pd.read_csv(f, index_col="timestamp")
+        df.index = pd.to_datetime(df.index, utc=True)
+        return df
     W = rd(os.path.join(dataset_dir, "mains.csv.gz"))
     apps = {os.path.basename(f)[len("appliances_"):-len(".csv.gz")]: rd(f)
             for f in sorted(glob.glob(os.path.join(dataset_dir, "appliances_*.csv.gz")))}
