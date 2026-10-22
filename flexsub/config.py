@@ -30,5 +30,6 @@ class Config:
     request_duration_h: int = 2     # length of the upward request block
     cap_quantile: float = 0.9       # power cap: observed extra draw of shiftable load at that hour
     # M5 participation
-    participation: float = 0.3
+    participation: float = 1.0      # 1.0 = technical maximum (all homes respond)
+    participation_scenarios: Tuple[float, ...] = (0.2, 0.3, 0.5)   # 0.2 ~ LCL dToU enrolment (1,119 of ~5,500)
     holidays: Tuple[str, ...] = ()  # ISO dates, e.g. ("2026-08-15",)
