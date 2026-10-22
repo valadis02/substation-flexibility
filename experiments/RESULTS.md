@@ -7,6 +7,24 @@ the final split (`data/splits.json`, `data/processed/lcl/groups_meta.json`) has 
 
 Method version at the time of each test is given in brackets.
 
+## Design principle: data-driven parameters
+
+The method should adapt to each substation with as few hand-set numbers as possible. Anything made automatic is
+estimated only from the same substation's past data (never future data, never ground truth). Whatever stays fixed
+is checked in T4: if results are insensitive we say so; if not, it has to become data-driven.
+
+| Parameter | Now | How it becomes data-driven | Test |
+|---|---|---|---|
+| Neutral temperature, CDD/HDD bases | 20 / 24 / 16 C | heating and cooling balance points estimated from the substation's own load vs temperature | T2 |
+| Meal hours | 12-15, 18-22 | the substation's own daily profile, or HETUS by country | T3 |
+| Event threshold | 0.4 kW | relative to the substation's load distribution (0.4 kW means nothing at 500 homes) | T3 |
+| Base-load hours | 02-06 | hours of minimum load in the data | T3 |
+| Shift window | +-3 h | tolerance of delay from time-use and wet-appliance pilot studies | T3/T4 |
+| Power cap | 90th percentile | stays a parameter; T4 checks the sensitivity | T4 |
+| Calibration window | 14 days | Adaptive Conformal Inference adjusts it online | T1 (open) |
+| Target coverage | 0.90 | user choice (a DSO may want 0.95); not a method parameter | - |
+| Enrolment, response rate | 1.0 / scenarios | DSO input (enrolment); estimated from past events (response) | T6 |
+
 ---
 
 ## T1 - Baseline band (M1) [v0.2]
@@ -62,22 +80,46 @@ yet justified: split conformal assumes exchangeable data.
 
 ---
 
-## T2 - Thermal part (M2) [planned, v0.3]
+## T2 - Thermal part (M2) [v0.3, first run]
 
 **Question.** Does the thermal part estimated from the aggregate and the weather (prediction with actual weather
-minus prediction with neutral 20 C weather) match the measured AC / heating load?
+minus prediction with a neutral temperature T0) match the measured AC load, and which T0 is right?
 
-**Setup (planned).**
-- Ground truth: Plegma `ac_*` circuits (11 homes; split units, used for cooling and heating); REFIT electric
-  heaters (houses 1, 9, 16) as a small UK check.
-- Per home (N = 1) and for the groups Plegma allows (N = 2-5); M2 run leave-one-day-out on development data.
-- Metrics: hourly and daily correlation with measured AC; daily energy error; share of thermal load in total vs
-  true share (AWFE p90, as Ponocko & Milanovic); separately for cooling and heating months; peak-hour error.
+**Setup.** Plegma development homes (8 with AC, 2 without as negative control), one home at a time (Plegma homes
+overlap too little in time for groups). Out-of-sample by leave-one-week-out. T0 swept 16-26 C in 0.5 C steps. Two
+model variants: "full" (method features, incl. load lags) and "nolag" (calendar + weather only). Balance point from a
+one-break V fit of daily mean load on daily mean temperature. Scripts: `experiments/t2_thermal.py`,
+`experiments/t2_diag_clip.py`; tables: `experiments/results/t2_dev.md`.
 
-**What we expect.**
-- Good agreement on hot days and at the daily level (AC is clearly temperature-driven); weaker hour by hour
-  (AC switching also depends on occupancy).
-- Bias in winter: other weather-sensitive loads (boilers, lighting) will be counted as thermal.
-- Mild days (few degrees from 20 C): thermal close to zero in both estimate and truth.
-- If daily correlation is high but the level is biased, the fix is in the counterfactual (neutral temperature,
-  CDD/HDD bases); if correlation is low, the model does not isolate weather and M2 needs rethinking.
+**Results** (medians over AC homes, full model, T0 = 20):
+
+| Season | Hourly corr. | Daily corr. | Thermal share error | Daily energy error / mean daily AC |
+|---|---|---|---|---|
+| all | 0.34 | 0.62 | -0.03 | 1.02 |
+| cooling (May-Sep) | 0.31 | 0.61 | -0.11 | 0.89 |
+| heating (Nov-Mar) | -0.02 | -0.07 | +0.01 | 1.59 |
+
+- Homes differ a lot: daily correlation 0.6-0.76 in five homes (H02, H04, H05, H11, H12), 0.07-0.2 or negative in three.
+- T0 hardly matters: every metric changes by about 0.01 across 16-26 C.
+- Negative control: homes without AC get a thermal share of 9-15% (8.7% and 15.2% before clipping, 11-19% after).
+- Clipping the hourly estimate at 0 adds 1-5 points of thermal share (positive bias from clipping noise).
+- Per-home balance points mostly hit the edges of the search range (12 or 28 C): not identifiable per home.
+- The "nolag" variant is not better (daily corr. 0.46-0.57).
+
+**Conclusions.**
+1. At single-home level with a few months of history, M2 tracks AC only roughly in summer (daily corr. ~0.6) and
+   fails in winter. The daily energy error is about the size of the AC load itself.
+2. The estimate is dominated by confounding, not by T0: with less than a year per home, temperature moves together with
+   season, so anything seasonal (water heating, lighting, holidays, occupancy) is counted as thermal. That is why
+   homes without AC get 9-15% and why T0 has almost no effect.
+3. The question "which T0 is optimal" cannot be answered until the confounding is removed; it is not answered yet.
+4. Clipping at 0 must go (or be applied only after aggregation over hours/days).
+
+**Changes to test next (T2 v2).**
+- Seasonality features kept fixed in the counterfactual (day of year, daylight hours), so the temperature effect is
+  identified from hot vs cool days within the same season.
+- No clipping of the hourly estimate.
+- Two balance points (heating, cooling) estimated from the substation's data.
+- Groups instead of single homes where Plegma allows (summer 2023, when most homes overlap), since a substation is an
+  aggregate; and REFIT electric heaters for a winter check.
+- Pecan Street (several years, hundreds of homes with AC) is the proper test once access is granted.
