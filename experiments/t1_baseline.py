@@ -23,20 +23,40 @@ ap.add_argument("--tz", default=None)
 ap.add_argument("--seed", type=int, default=0)
 a = ap.parse_args()
 
-TZ = {"plegma": "Europe/Athens", "refit": "Europe/London", "ukdale": "Europe/London"}
+TZ = {"plegma": "Europe/Athens", "refit": "Europe/London", "ukdale": "Europe/London", "lcl": "Europe/London"}
 cfg = Config(tz=a.tz or TZ[a.dataset], retrain_days=a.retrain)
-d = load_processed(os.path.join("data", "processed", a.dataset))
-W = splits.development(d["W"], a.dataset)
-weather = None if (a.no_weather or d["weather"] is None) else d["weather"]
+LCL = a.dataset == "lcl"
+if LCL:
+    # precomputed group sums (scripts/prepare_lcl.py); T1 uses Std-tariff development groups before the time cut
+    import json
+    ddir = os.path.join("data", "processed", "lcl")
+    G = pd.read_csv(os.path.join(ddir, "groups.csv.gz"), index_col="timestamp"); G.index = pd.to_datetime(G.index, utc=True)
+    cut = pd.Timestamp(json.load(open(os.path.join(ddir, "groups_meta.json")))["time_cut"])
+    G = G[G.index < cut]
+    wf = os.path.join(ddir, "weather.csv.gz")
+    weather = None
+    if os.path.exists(wf) and not a.no_weather:
+        weather = pd.read_csv(wf, index_col="timestamp"); weather.index = pd.to_datetime(weather.index, utc=True)
+    W = None
+else:
+    d = load_processed(os.path.join("data", "processed", a.dataset))
+    W = splits.development(d["W"], a.dataset)
+    weather = None if (a.no_weather or d["weather"] is None) else d["weather"]
 rng = np.random.default_rng(a.seed)
-homes = list(W.columns)
+homes = [] if LCL else list(W.columns)
 rows = []
 for N in a.sizes:
-    if N > len(homes):
+    if LCL:
+        groups = [[c] for c in G.columns if c.startswith(f"dev_Std_N{N}_g")]
+    else:
+        groups = None
+    if groups is None and N > len(homes):
         continue
     from itertools import combinations
     from math import comb
-    if comb(len(homes), N) <= a.groups:
+    if groups is not None:
+        pass
+    elif comb(len(homes), N) <= a.groups:
         groups = [sorted(c) for c in combinations(homes, N)]
     else:
         seen = set()
@@ -44,7 +64,7 @@ for N in a.sizes:
             seen.add(tuple(sorted(rng.choice(homes, size=N, replace=False).tolist())))
         groups = [list(c) for c in sorted(seen)]
     for g, members in enumerate(groups):
-        y = W[members].sum(axis=1, min_count=N)
+        y = G[members[0]] if LCL else W[members].sum(axis=1, min_count=N)
         y = y[y.first_valid_index():y.last_valid_index()].asfreq("1h")
         w = None if weather is None else weather.reindex(y.index)
         y.index = y.index.tz_convert(cfg.tz)

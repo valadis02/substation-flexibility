@@ -65,4 +65,13 @@ Status: *read* = full text read; *abstract* = only abstract/summary seen; *to re
 - [22] Odyssee-Mure, "Unit consumption of air conditioning". (M2 plausibility)
 - [23] University of Otago, "Estimating the technical potential for residential demand response in New Zealand".
 
+## 6. Network size (homes per substation)
+
+- [47] areti, "Piano di Sviluppo 2025–2029": 70 primary and 13,452 secondary (MV/LV) substations at 31/12/2024; >1.6 million connections in Rome and Formello. -> ~120 connections per secondary, ~23,000 per primary.
+- [48] Acea, Bilancio consolidato 2023, "Reti & Smart Cities": areti 1,662 thousand customers (2023).
+- [49] Wiener Netze, factsheet: 11,000 transformer stations, 1.6 million electricity meters. -> ~145 meters per station.
+- [50] HEDNO company brochure (figures for 2014): 7.4 million customers, 161,900 MV/LV transformers, 225 HV/MV substations. -> ~46 customers per MV/LV transformer nationally (rural pole-mounted transformers pull this down; no Athens figure found).
+- [51] UK Power Networks / Low Carbon London, "LCL Project Closedown Report", Ofgem 2015: ~4,600 London secondary substations = 25% of stock (-> ~18,000); >10% of London substations have <10 customers; GB primary substations typically serve 10–11,000 customers; dToU households responded on average c. 50 W (56 W winter, 34 W summer), best responders ~3x.
+- [52] Low Carbon London smart-meter data, London Datastore: 5,567 households, half-hourly, Nov 2011–Feb 2014; ~1,100 on dynamic ToU in 2013 (day-ahead High/Low/Normal price signals, Tariffs.xlsx); CC BY 4.0.
+
 Open gap: no source yet with measured enrolment/response rates to set the participation share (M5, default 0.3).

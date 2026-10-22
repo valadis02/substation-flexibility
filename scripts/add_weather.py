@@ -9,7 +9,11 @@ from flexsub.data import load_openmeteo_csv, load_processed
 
 name, path = sys.argv[1], sys.argv[2]
 out = os.path.join(os.path.dirname(__file__), "..", "data", "processed", name)
-W = load_processed(out)["W"]
+if os.path.exists(os.path.join(out, "mains.csv.gz")):
+    W = load_processed(out)["W"]
+else:  # LCL: only group sums are stored
+    W = pd.read_csv(os.path.join(out, "groups.csv.gz"), index_col="timestamp")
+    W.index = pd.to_datetime(W.index, utc=True)
 w = load_openmeteo_csv(path, W.index)
 print(w.describe().T[["count", "mean", "min", "max"]].round(2))
 assert w["temp"].notna().mean() > 0.95, "weather does not cover the load period: check dates/timezone=GMT in the URL"
