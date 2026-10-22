@@ -21,19 +21,22 @@ def rolling_origin(y, X, Xn, test_days, cfg):
             tr = ok & (idx < D)
             if tr.sum() < 24 * 14:
                 continue
-            models = {q: _fit(X[tr], y[tr], q, cfg) for q in cfg.quantiles}
+            cols = X.columns[X[tr].nunique() >= 2]          # features that vary in the training rows
+            models = {q: _fit(X.loc[tr, cols], y[tr], q, cfg) for q in cfg.quantiles}
             last_fit = D
         out = pd.DataFrame(index=idx[te])
         out["actual"] = y[te]
         for q, m in models.items():
-            out[f"q{q}"] = m.predict(X[te])
-        out["thermal"] = out[f"q{cfg.quantiles[1]}"] - models[cfg.quantiles[1]].predict(Xn[te])
+            out[f"q{q}"] = m.predict(X.loc[te, cols])
+        out["thermal"] = out[f"q{cfg.quantiles[1]}"] - models[cfg.quantiles[1]].predict(Xn.loc[te, cols])
         rows.append(out)
     return pd.concat(rows)
 
 
 def usable_rows(y, X):
     """Rows with a target and a one-week lag; other missing features are left to the model (HGB handles NaN)."""
+    if "lag7d" not in X:
+        return pd.Series(False, index=y.index)
     return y.notna() & X["lag7d"].notna()
 
 

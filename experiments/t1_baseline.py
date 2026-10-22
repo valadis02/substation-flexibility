@@ -54,7 +54,17 @@ for N in a.sizes:
         Xn = features.build(y, w, cfg, neutral=True) if w is not None else X
         loc_days = pd.date_range(y.index[0].date() + pd.Timedelta(days=42), y.index[-1].date(), freq="D").tz_localize(cfg.tz)
         t0 = time.time()
-        R = baseline.conformal_calibrate(baseline.rolling_origin(y, X, Xn, loc_days, cfg), cfg).dropna(subset=["cal_lo"])
+        if y.notna().sum() < 24 * 60:
+            print(f"skip N={N} {members}: fewer than 60 days with data for all members", flush=True)
+            continue
+        try:
+            R = baseline.conformal_calibrate(baseline.rolling_origin(y, X, Xn, loc_days, cfg), cfg).dropna(subset=["cal_lo"])
+        except ValueError as e:
+            print(f"skip N={N} {members}: {e}", flush=True)
+            continue
+        if len(R) < 24 * 14:
+            print(f"skip N={N} {members}: fewer than 14 scored days", flush=True)
+            continue
         m = R["actual"].mean()
         rows.append(dict(dataset=a.dataset, N=N, group=g, members=" ".join(members), hours=len(R), days=R.index.normalize().nunique(),
                          mean_kw=m,
@@ -64,6 +74,8 @@ for N in a.sizes:
                          is_cal_rel=metrics.interval_score(R.actual, R.cal_lo, R.cal_hi) / m,
                          nmae_median=metrics.mae(R.actual, R["q0.5"]) / m,
                          secs=round(time.time() - t0)))
+        os.makedirs("outputs/t1", exist_ok=True)
+        pd.DataFrame(rows).to_csv(f"outputs/t1/{a.dataset}_groups.csv", index=False)
         print({k: (round(float(v), 3) if isinstance(v, (float, np.floating)) else v) for k, v in rows[-1].items() if k != "members"}, flush=True)
 
 res = pd.DataFrame(rows)
