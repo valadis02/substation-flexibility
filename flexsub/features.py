@@ -16,7 +16,18 @@ def calendar_features(idx, cfg):
     F["is_weekend"] = (loc.dayofweek >= 5).astype(int)
     hol = pd.to_datetime(list(cfg.holidays)).date if cfg.holidays else []
     F["holiday"] = np.isin(loc.date, hol).astype(int)
+    if getattr(cfg, "seasonal_features", False):
+        doy = loc.dayofyear.to_numpy()
+        F["doy_sin"], F["doy_cos"] = np.sin(2 * np.pi * doy / 365.25), np.cos(2 * np.pi * doy / 365.25)
+        F["day_length"] = day_length(doy, cfg.latitude)
     return F
+
+
+def day_length(doy, lat):
+    """Hours of daylight (standard astronomical approximation)."""
+    decl = np.deg2rad(23.44) * np.sin(2 * np.pi * (284 + doy) / 365)
+    x = np.clip(-np.tan(np.deg2rad(lat)) * np.tan(decl), -1, 1)
+    return 24 / np.pi * np.arccos(x)
 
 
 def load_features(y, cfg):
@@ -42,7 +53,12 @@ def weather_features(w, cfg, temp_override=None):
     """Weather features. `temp_override` (e.g. a constant 20 deg C) builds the counterfactual 'neutral weather' used for the thermal part."""
     idx = w.index
     day = _loc(idx, cfg).normalize()
-    t = w["temp"] if temp_override is None else pd.Series(float(temp_override), index=idx)
+    if temp_override is None:
+        t = w["temp"]
+    elif isinstance(temp_override, (tuple, list)):          # neutral band: remove only what lies outside it
+        t = w["temp"].clip(lower=temp_override[0], upper=temp_override[1])
+    else:
+        t = pd.Series(float(temp_override), index=idx)
     tg = pd.Series(t.values, index=day)
     F = pd.DataFrame(index=idx)
     F["temp"], F["rh"], F["cloud"], F["rad"], F["is_day"] = t, w["rh"], w["cloud"], w["rad"], w["is_day"]
@@ -60,6 +76,30 @@ def build(y, w, cfg, neutral=False):
     Columns that are entirely NaN (e.g. cloud/radiation when the dataset has no such data) are dropped."""
     parts = [calendar_features(y.index, cfg), load_features(y, cfg)]
     if w is not None:
-        parts.append(weather_features(w, cfg, temp_override=cfg.neutral_temp if neutral else None))
+        parts.append(weather_features(w, cfg, temp_override=neutral_value(cfg) if neutral else None))
     X = pd.concat(parts, axis=1)
     return X.loc[:, X.notna().any()]
+
+
+def neutral_value(cfg):
+    band = getattr(cfg, "neutral_band", None)
+    return tuple(band) if band is not None else cfg.neutral_temp
+
+
+def balance_points(temp_daily, load_daily, grid=np.arange(10, 30.01, 0.5)):
+    """Heating and cooling balance points from daily means: fit load = a + bh*max(Th - T, 0) + bc*max(T - Tc, 0)
+    with Th <= Tc (dead band between them); returns (Th, Tc) with the smallest squared error.
+    Uses only load and temperature, so it can be run on any substation."""
+    ok = temp_daily.notna() & load_daily.notna()
+    t, v = temp_daily[ok].to_numpy(), load_daily[ok].to_numpy()
+    best = (np.inf, (np.nan, np.nan))
+    for th in grid:
+        for tc in grid[grid >= th]:
+            A = np.c_[np.ones_like(t), np.maximum(th - t, 0), np.maximum(t - tc, 0)]
+            coef, *_ = np.linalg.lstsq(A, v, rcond=None)
+            if coef[1] < 0 or coef[2] < 0:          # load must not fall when it gets colder below Th / hotter above Tc
+                continue
+            sse = float(((A @ coef - v) ** 2).sum())
+            if sse < best[0]:
+                best = (sse, (float(th), float(tc)))
+    return best[1]

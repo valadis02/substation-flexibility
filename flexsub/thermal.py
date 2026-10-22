@@ -1,4 +1,4 @@
-"""M2: thermal load = prediction with actual weather minus prediction with neutral weather (leave-one-day-out, so the model never sees the day it explains)."""
+"""M2: thermal load (may be negative hour by hour; sums over hours/days are what is meaningful) = prediction with actual weather minus prediction with neutral weather (leave-one-day-out, so the model never sees the day it explains)."""
 import numpy as np
 import pandas as pd
 from sklearn.ensemble import HistGradientBoostingRegressor as HGB
@@ -15,4 +15,4 @@ def thermal_loo(y, X, Xn, days, cfg):
             continue
         m = HGB(loss="quantile", quantile=0.5, **cfg.gbm).fit(X[tr], y[tr])
         out[te] = m.predict(X[te]) - m.predict(Xn[te])
-    return out.clip(lower=0)
+    return out   # not clipped: clipping hourly noise at 0 biases the thermal energy upwards (T2 v1)

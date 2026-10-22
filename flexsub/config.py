@@ -6,6 +6,8 @@ from typing import Tuple
 class Config:
     """All tunable parameters of the method in one place (see docs/experiment_log.md for how changes are tracked)."""
     tz: str = "Europe/Athens"
+    latitude: float = 37.98          # for day length (seasonal feature)
+    seasonal_features: bool = True   # day of year + day length; fixed in the thermal counterfactual (v0.4)
     # M1 baseline
     quantiles: Tuple[float, float, float] = (0.05, 0.5, 0.95)
     calib_days: int = 14            # window of past days used for conformal calibration
@@ -15,7 +17,8 @@ class Config:
     gbm: dict = field(default_factory=lambda: dict(max_iter=300, learning_rate=0.05, max_leaf_nodes=15,
                                                    min_samples_leaf=20, l2_regularization=1.0, random_state=0))
     # M2 thermal
-    neutral_temp: float = 20.0      # counterfactual temperature (deg C)
+    neutral_temp: float = 20.0      # counterfactual temperature (deg C); used when neutral_band is None
+    neutral_band: object = None     # (heating balance point, cooling balance point): counterfactual = temp clipped to the band
     cdd_base: float = 24.0
     hdd_base: float = 16.0
     # M3 decomposition

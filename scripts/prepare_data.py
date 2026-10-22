@@ -4,13 +4,16 @@ Run once per dataset on the machine that has the raw files, then commit data/pro
     python scripts/prepare_data.py plegma  C:\\path\\to\\Clean_Dataset
     python scripts/prepare_data.py refit   C:\\path\\to\\CLEAN_REFIT_081116
     python scripts/prepare_data.py ukdale  C:\\path\\to\\ukdale.h5
+    python scripts/prepare_data.py pecan_austin C:\\path\\to\\15minute_data_austin.csv   (NOT committed: Dataport licence)
 Licences: Plegma, REFIT and UK-DALE are CC BY 4.0 (cite them; see data/README.md).
 """
 import sys, os, time
 from flexsub import data
 
 name, path = sys.argv[1], sys.argv[2]
-loader = {"plegma": data.load_plegma, "refit": data.load_refit, "ukdale": data.load_ukdale}[name]
+loader = {"plegma": data.load_plegma, "refit": data.load_refit, "ukdale": data.load_ukdale,
+          "pecan_austin": data.load_pecan_street, "pecan_newyork": data.load_pecan_street,
+          "pecan_california": data.load_pecan_street}[name]
 t = time.time()
 d = loader(path)
 out = os.path.join(os.path.dirname(__file__), "..", "data", "processed", name)

@@ -10,7 +10,7 @@ No raw data is committed (see `.gitignore`). Put local copies in `data/raw/` (or
 | REFIT (UK, 20 homes, ~8 s, 2013-2015) | washing machine, tumble dryer, dishwasher, electric heaters (houses 1, 9, 16) | `load_refit` | No AC/EV. Houses 11, 21: mains affected by PV. Appliance names from the README (see `flexsub/appliances.py`, read its notes on swaps). CC BY 4.0 |
 | UK-DALE (UK, 5 homes, 6 s) | washing machine, dishwasher, washer dryer, electric heater (house 3) | `load_ukdale` | No AC/EV. Mains of building 1 are apparent power. CC BY 4.0 |
 | CU-BEMS (Thailand, office building) | per-floor AC, lighting, plugs | not yet | Commercial, not residential |
-| Pecan Street Dataport | HVAC, EV, water heater, dryer, dishwasher, ... | `load_pecan_street` (stub) | Access request sent; approval pending |
+| Pecan Street Dataport, University Free static files (15-min): Austin 25 homes 2018; Ithaca NY 25 homes May-Oct 2019; San Diego 23 homes, one year each 2014-2018 | AC, furnace, heater, EV (Austin 8, NY 5), dryer, dishwasher | `load_pecan_street` | **Local only, never committed** (`data/processed/pecan*/` ignored): Dataport terms forbid redistribution; the free licence excludes funded research, so use in a funded-project paper needs Pecan's confirmation or a paid licence. Build with `python scripts/prepare_data.py pecan_austin <csv>` (also pecan_newyork, pecan_california) and add weather with `scripts/add_weather.py`. |
 
 Heron data is not used for tests (no ground truth) and must not be committed (customer data).
 

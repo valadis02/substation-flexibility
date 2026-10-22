@@ -8,3 +8,5 @@ __pycache__/
 *.egg-info/
 .env
 *.pdf.bak
+# Pecan Street Dataport: licence forbids redistribution
+data/processed/pecan*/

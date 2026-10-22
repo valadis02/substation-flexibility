@@ -3,6 +3,7 @@
 No raw data is stored in the repository (see data/README.md).
 """
 import glob
+import numpy as np
 import pandas as pd
 
 
@@ -84,8 +85,35 @@ def load_plegma(root, tz="Europe/Athens", min_coverage=0.8):
 
 
 # ---- adapters for public datasets with ground truth (to be implemented when data is obtained; see docs/test_plan.pdf)
-def load_pecan_street(path):  # pragma: no cover
-    raise NotImplementedError("Needs Dataport access. Expected output: hourly kW per home + per-circuit ground truth (HVAC, EV, water heater, ...)")
+def load_pecan_street(path, tz="America/Chicago"):
+    """Pecan Street Dataport 15-minute export (e.g. 15minute_data_austin.csv): dataid, local_15min, circuits in kW.
+
+    Consumption = grid + solar + solar2 (grid is net of PV). Returns dict(W, appliances) with hourly kW, UTC index,
+    homes as 'P<dataid>'. Appliance groups summed per home: ac (air1-3, airwindowunit1), furnace (furnace1-2),
+    heater (heater1-3), ev (car1-2), dryer (drye1, dryg1), dishwasher, clotheswasher (clotheswasher1,
+    clotheswasher_dryg1), waterheater (waterheater1-2), solar.
+    Licence: Dataport terms forbid redistribution - keep the raw file and data/processed/pecan out of git.
+    """
+    d = pd.read_csv(path)
+    t = pd.to_datetime(d["local_15min"], utc=True)          # strings carry the UTC offset (e.g. -06)
+    d.index = t
+    groups = {"ac": ["air1", "air2", "air3", "airwindowunit1"], "furnace": ["furnace1", "furnace2"],
+              "heater": ["heater1", "heater2", "heater3"], "ev": ["car1", "car2"], "dryer": ["drye1", "dryg1"],
+              "dishwasher": ["dishwasher1"], "clotheswasher": ["clotheswasher1", "clotheswasher_dryg1"],
+              "waterheater": ["waterheater1", "waterheater2"], "solar": ["solar", "solar2"]}
+    W, apps = {}, {}
+    for hid, g in d.groupby("dataid"):
+        g = g.sort_index()
+        g = g[~g.index.duplicated()]
+        sol = g[["solar", "solar2"]].sum(axis=1, min_count=1).fillna(0)
+        cons = g["grid"] + sol
+        cons[cons < -0.05] = np.nan                       # negative consumption = missing PV reading
+        A = pd.DataFrame({k: g[[c for c in cols if c in g]].sum(axis=1, min_count=1) for k, cols in groups.items()})
+        A = A.loc[:, A.notna().mean() > 0.5]
+        key = f"P{hid}"
+        W[key] = cons.resample("1h").mean()
+        apps[key] = A.resample("1h").mean()
+    return dict(W=pd.DataFrame(W), appliances=apps)
 
 
 def load_refit(path, houses=None, min_rows_per_hour=250, chunksize=2_000_000):
