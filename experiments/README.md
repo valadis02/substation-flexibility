@@ -1,11 +1,13 @@
 # Experiments
 
+Conclusions of every test: `RESULTS.md`. Method changes: `docs/experiment_log.md`.
+
 One folder or script per test of the plan (`docs/test_plan.pdf`). Status:
 
 | Test | What | Data | Status |
 |---|---|---|---|
-| T1 | Baseline coverage / interval score, forecast weather, group size | Pecan Street, REFIT, UK-DALE, IDEAL | not started |
-| T2 | Thermal part vs HVAC circuit | Pecan Street | not started |
+| T1 | Baseline coverage / interval score, forecast weather, group size | REFIT, UK-DALE, Plegma, LCL | done on dev (observed weather); forecast weather + ACI open |
+| T2 | Thermal part vs AC / heater circuits | Plegma, REFIT, (Pecan Street) | next |
 | T3 | Shiftable part vs appliances; comparison with Ponocko & Milanovic (0% / 5% / 100%) and oracle | Pecan Street, REFIT, UK-DALE, IDEAL | not started |
 | T4 | Sensitivity (threshold 0.4 kW, meal hours, window, cap) | same | not started |
 | T5 | Ablations (no weather, no calibration, no M2/M3) | same | not started |

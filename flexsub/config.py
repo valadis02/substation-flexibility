@@ -30,6 +30,10 @@ class Config:
     request_duration_h: int = 2     # length of the upward request block
     cap_quantile: float = 0.9       # power cap: observed extra draw of shiftable load at that hour
     # M5 participation
-    participation: float = 1.0      # 1.0 = technical maximum (all homes respond)
-    participation_scenarios: Tuple[float, ...] = (0.2, 0.3, 0.5)   # 0.2 ~ LCL dToU enrolment (1,119 of ~5,500)
+    # M5 scenarios. The headline result is the technical maximum (every home, every event). Scenarios scale it by
+    # enrolment x response rate (share of enrolled homes that actually respond to an event). Scenarios are only for
+    # illustration (how it would look for a DSO) and comparison with realised responses in the literature.
+    participation: float = 1.0      # technical maximum
+    participation_scenarios: Tuple[Tuple[float, float], ...] = ((0.2, 0.5), (0.2, 1.0), (0.5, 0.5), (0.5, 1.0))
+    # enrolment 0.2 ~ LCL dToU (1,119 of ~5,500); response rates are placeholders until T6 estimates them
     holidays: Tuple[str, ...] = ()  # ISO dates, e.g. ("2026-08-15",)
