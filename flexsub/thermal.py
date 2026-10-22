@@ -6,7 +6,7 @@ from sklearn.ensemble import HistGradientBoostingRegressor as HGB
 
 def thermal_loo(y, X, Xn, days, cfg):
     idx = y.index
-    ok = X.notna().all(axis=1)
+    ok = y.notna() & X["lag7d"].notna()
     out = pd.Series(np.nan, index=idx)
     for D in days:
         te = (idx >= D) & (idx < D + pd.Timedelta(days=1)) & ok

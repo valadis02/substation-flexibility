@@ -11,22 +11,30 @@ def _fit(X, y, q, cfg):
 def rolling_origin(y, X, Xn, test_days, cfg):
     """For each test day D: train on rows before D, predict the day. Xn is the neutral-weather feature matrix (thermal counterfactual)."""
     idx = y.index
-    ok = X.notna().all(axis=1)
-    rows = []
+    ok = usable_rows(y, X)
+    rows, models, last_fit = [], None, None
     for D in test_days:
-        tr = ok & (idx < D)
         te = (idx >= D) & (idx < D + pd.Timedelta(days=1)) & ok
-        if tr.sum() < 24 * 14 or te.sum() == 0:
+        if te.sum() == 0:
             continue
+        if models is None or (D - last_fit).days >= cfg.retrain_days:
+            tr = ok & (idx < D)
+            if tr.sum() < 24 * 14:
+                continue
+            models = {q: _fit(X[tr], y[tr], q, cfg) for q in cfg.quantiles}
+            last_fit = D
         out = pd.DataFrame(index=idx[te])
         out["actual"] = y[te]
-        for q in cfg.quantiles:
-            m = _fit(X[tr], y[tr], q, cfg)
+        for q, m in models.items():
             out[f"q{q}"] = m.predict(X[te])
-            if q == 0.5:
-                out["thermal"] = out["q0.5"] - m.predict(Xn[te])
+        out["thermal"] = out[f"q{cfg.quantiles[1]}"] - models[cfg.quantiles[1]].predict(Xn[te])
         rows.append(out)
     return pd.concat(rows)
+
+
+def usable_rows(y, X):
+    """Rows with a target and a one-week lag; other missing features are left to the model (HGB handles NaN)."""
+    return y.notna() & X["lag7d"].notna()
 
 
 def conformal_calibrate(R, cfg):

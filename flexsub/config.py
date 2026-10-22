@@ -11,6 +11,7 @@ class Config:
     calib_days: int = 14            # window of past days used for conformal calibration
     calib_quantile: float = 0.9     # target coverage of the calibrated band
     calib_min_samples: int = 72
+    retrain_days: int = 1           # refit the quantile models every this many days (1 = daily, as in the method)
     gbm: dict = field(default_factory=lambda: dict(max_iter=300, learning_rate=0.05, max_leaf_nodes=15,
                                                    min_samples_leaf=20, l2_regularization=1.0, random_state=0))
     # M2 thermal

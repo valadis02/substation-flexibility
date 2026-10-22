@@ -56,5 +56,10 @@ def weather_features(w, cfg, temp_override=None):
 
 
 def build(y, w, cfg, neutral=False):
-    return pd.concat([calendar_features(y.index, cfg), load_features(y, cfg),
-                      weather_features(w, cfg, temp_override=cfg.neutral_temp if neutral else None)], axis=1)
+    """Feature matrix. `y` must be on a complete hourly index (lags are row shifts). `w=None` -> no weather features.
+    Columns that are entirely NaN (e.g. cloud/radiation when the dataset has no such data) are dropped."""
+    parts = [calendar_features(y.index, cfg), load_features(y, cfg)]
+    if w is not None:
+        parts.append(weather_features(w, cfg, temp_override=cfg.neutral_temp if neutral else None))
+    X = pd.concat(parts, axis=1)
+    return X.loc[:, X.notna().any()]

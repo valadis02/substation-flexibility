@@ -40,3 +40,17 @@ def test_thermal_tracks_true_thermal_on_synthetic():
     th = res["thermal"].dropna()
     tt = truth["thermal"].copy(); tt.index = tt.index.tz_convert(cfg.tz)
     assert np.corrcoef(th, tt.reindex(th.index))[0, 1] > 0.5
+
+
+def test_splits_disjoint():
+    import numpy as np, pandas as pd
+    from flexsub import splits
+    idx = pd.date_range("2024-01-01", periods=1000, freq="h", tz="UTC")
+    W = pd.DataFrame(np.random.default_rng(0).random((1000, 6)), index=idx, columns=[f"H{i}" for i in range(6)])
+    s = splits.make({"x": W}, {"x": 2}, exclude={"x": ["H5"]})
+    D, F = splits.development(W, "x", s), splits.final_test(W, "x", s)
+    held = s["datasets"]["x"]["held_out_homes"]
+    assert not set(held) & set(D.columns) and "H5" not in F.columns
+    common = [h for h in D.columns]
+    assert not (D[common].notna() & F[common].notna()).any().any()   # no hour of a dev home in both views
+    assert abs(D[common].notna().mean().mean() - 0.8) < 0.01

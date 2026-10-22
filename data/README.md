@@ -20,6 +20,16 @@ Heron data is not used for tests (no ground truth) and must not be committed (cu
 
 Cite: Plegma (Athanasoulias et al., Scientific Data 2024), REFIT (Murray et al., 2015/2017), UK-DALE (Kelly & Knottenbelt, Scientific Data 2015).
 
+## Weather for REFIT and UK-DALE (Open-Meteo, ERA5)
+
+Open each URL in a browser (it downloads a CSV), then run `python scripts/add_weather.py <dataset> <csv>`.
+`timezone=GMT` matters: the loader assumes UTC.
+
+- REFIT (Loughborough, 52.77 N, 1.20 W): https://archive-api.open-meteo.com/v1/archive?latitude=52.77&longitude=-1.20&start_date=2013-09-01&end_date=2015-07-31&hourly=temperature_2m,relative_humidity_2m,cloud_cover,shortwave_radiation,is_day&timezone=GMT&format=csv
+- UK-DALE (London, 51.51 N, 0.13 W; houses are in or near London, exact locations not published): https://archive-api.open-meteo.com/v1/archive?latitude=51.51&longitude=-0.13&start_date=2012-11-01&end_date=2017-05-01&hourly=temperature_2m,relative_humidity_2m,cloud_cover,shortwave_radiation,is_day&timezone=GMT&format=csv
+
+Plegma ships its own (homes' external sensors); an Open-Meteo series for Athens can replace it later for a like-for-like comparison.
+
 ## Formats
 
 - Loaders return `dict(W=hourly kW mains (UTC, one column per home), appliances={home: hourly kW per appliance}, ...)`.
