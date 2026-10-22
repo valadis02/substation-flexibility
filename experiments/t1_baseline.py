@@ -21,6 +21,7 @@ ap.add_argument("--retrain", type=int, default=7)
 ap.add_argument("--no-weather", action="store_true")
 ap.add_argument("--tz", default=None)
 ap.add_argument("--seed", type=int, default=0)
+ap.add_argument("--out", default="experiments/results/t1_dev.md")
 a = ap.parse_args()
 
 TZ = {"plegma": "Europe/Athens", "refit": "Europe/London", "ukdale": "Europe/London", "lcl": "Europe/London"}
@@ -71,14 +72,13 @@ for N in a.sizes:
         if w is not None:
             w.index = w.index.tz_convert(cfg.tz)
         X = features.build(y, w, cfg)
-        Xn = features.build(y, w, cfg, neutral=True) if w is not None else X
         loc_days = pd.date_range(y.index[0].date() + pd.Timedelta(days=42), y.index[-1].date(), freq="D").tz_localize(cfg.tz)
         t0 = time.time()
         if y.notna().sum() < 24 * 60:
             print(f"skip N={N} {members}: fewer than 60 days with data for all members", flush=True)
             continue
         try:
-            R = baseline.conformal_calibrate(baseline.rolling_origin(y, X, Xn, loc_days, cfg), cfg).dropna(subset=["cal_lo"])
+            R = baseline.conformal_calibrate(baseline.rolling_origin(y, X, loc_days, cfg), cfg).dropna(subset=["cal_lo"])
         except ValueError as e:
             print(f"skip N={N} {members}: {e}", flush=True)
             continue
@@ -95,17 +95,17 @@ for N in a.sizes:
                          nmae_median=metrics.mae(R.actual, R["q0.5"]) / m,
                          secs=round(time.time() - t0)))
         os.makedirs("outputs/t1", exist_ok=True)
-        pd.DataFrame(rows).to_csv(f"outputs/t1/{a.dataset}_groups.csv", index=False)
+        pd.DataFrame(rows).to_csv(f"outputs/t1/{a.dataset}_groups_{os.path.basename(a.out)[:-3]}.csv", index=False)
         print({k: (round(float(v), 3) if isinstance(v, (float, np.floating)) else v) for k, v in rows[-1].items() if k != "members"}, flush=True)
 
 res = pd.DataFrame(rows)
 os.makedirs("outputs/t1", exist_ok=True)
-res.to_csv(f"outputs/t1/{a.dataset}_groups.csv", index=False)
+res.to_csv(f"outputs/t1/{a.dataset}_groups_{os.path.basename(a.out)[:-3]}.csv", index=False)
 summ = res.groupby("N")[["hours", "mean_kw", "cov_raw", "cov_cal", "width_cal_rel", "is_cal_rel", "nmae_median"]].median().round(3)
 summ.insert(0, "groups", res.groupby("N").size())
 print(summ.to_string())
 os.makedirs("experiments/results", exist_ok=True)
-with open("experiments/results/t1_dev.md", "a") as f:
+with open(a.out, "a") as f:
     f.write(f"\n## {a.dataset} (development split, weather={'yes' if weather is not None else 'no'}, retrain every {a.retrain} d, seed {a.seed})\n\n")
     f.write("Medians over groups. cov = share of hours inside the band (target 0.90 after calibration); width/IS/nMAE relative to mean load.\n\n")
     f.write(summ.to_markdown() + "\n")

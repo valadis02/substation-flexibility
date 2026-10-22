@@ -15,9 +15,9 @@ def _run():
 def test_decomposition_sums_to_actual():
     _, _, _, res = _run()
     D = res["decomposition"]
-    parts = D[["base", "thermal", "ev_shift", "ev_meal", "routine"]].sum(axis=1)
+    parts = D[["base", "thermal", "shiftable", "routine"]].sum(axis=1)
     assert np.allclose(parts, D["actual"], atol=1e-6)
-    assert (D[["base", "thermal", "ev_shift", "ev_meal", "routine"]] >= -1e-9).all().all()
+    assert (D[["base", "thermal", "shiftable", "routine"]] >= -1e-9).all().all()
 
 
 def test_flexibility_table_shape_and_signs():

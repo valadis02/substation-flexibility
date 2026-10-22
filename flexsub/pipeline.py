@@ -12,9 +12,9 @@ def run(W, weather, cfg, test_days, participation=None, response=1.0):
     W = W.copy(); W.index = W.index.tz_convert(cfg.tz)
     weather = weather.copy(); weather.index = weather.index.tz_convert(cfg.tz)
     y = W.sum(axis=1)
-    X, Xn = features.build(y, weather, cfg), features.build(y, weather, cfg, neutral=True)
-    R = baseline.conformal_calibrate(baseline.rolling_origin(y, X, Xn, test_days, cfg), cfg)
-    th = thermal.thermal_loo(y, X, Xn, test_days, cfg)
+    X = features.build(y, weather, cfg)
+    R = baseline.conformal_calibrate(baseline.rolling_origin(y, X, test_days, cfg), cfg)
+    th = thermal.thermal_dd_loo(y, weather, test_days, cfg)
     D = decompose.decompose_substation(W, weather, th, cfg)
     F = flexibility.flexibility_by_hour(D, cfg)
     return dict(baseline=R, thermal=th, decomposition=D, flexibility=F,

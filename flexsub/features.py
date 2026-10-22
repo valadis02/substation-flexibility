@@ -49,41 +49,29 @@ def load_features(y, cfg):
     return F
 
 
-def weather_features(w, cfg, temp_override=None):
-    """Weather features. `temp_override` (e.g. a constant 20 deg C) builds the counterfactual 'neutral weather' used for the thermal part."""
+def weather_features(w, cfg):
+    """Weather features for the boosting models (M1). No hand-set temperature thresholds: trees split on temperature."""
     idx = w.index
     day = _loc(idx, cfg).normalize()
-    if temp_override is None:
-        t = w["temp"]
-    elif isinstance(temp_override, (tuple, list)):          # neutral band: remove only what lies outside it
-        t = w["temp"].clip(lower=temp_override[0], upper=temp_override[1])
-    else:
-        t = pd.Series(float(temp_override), index=idx)
+    t = w["temp"]
     tg = pd.Series(t.values, index=day)
     F = pd.DataFrame(index=idx)
     F["temp"], F["rh"], F["cloud"], F["rad"], F["is_day"] = t, w["rh"], w["cloud"], w["rad"], w["is_day"]
     F["temp_day_mean"] = pd.Series(tg.groupby(level=0).transform("mean").values, index=idx)
     F["temp_day_max"] = pd.Series(tg.groupby(level=0).transform("max").values, index=idx)
     F["temp_prevday_mean"] = F["temp_day_mean"].shift(24)
-    F["cdd"] = np.maximum(t - cfg.cdd_base, 0)
-    F["hdd"] = np.maximum(cfg.hdd_base - t, 0)
     F["temp_lag3h"] = t.shift(3)
     return F
 
 
-def build(y, w, cfg, neutral=False):
+def build(y, w, cfg):
     """Feature matrix. `y` must be on a complete hourly index (lags are row shifts). `w=None` -> no weather features.
     Columns that are entirely NaN (e.g. cloud/radiation when the dataset has no such data) are dropped."""
     parts = [calendar_features(y.index, cfg), load_features(y, cfg)]
     if w is not None:
-        parts.append(weather_features(w, cfg, temp_override=neutral_value(cfg) if neutral else None))
+        parts.append(weather_features(w, cfg))
     X = pd.concat(parts, axis=1)
     return X.loc[:, X.notna().any()]
-
-
-def neutral_value(cfg):
-    band = getattr(cfg, "neutral_band", None)
-    return tuple(band) if band is not None else cfg.neutral_temp
 
 
 def balance_points(temp_daily, load_daily, grid=np.arange(10, 30.01, 0.5)):

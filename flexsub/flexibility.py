@@ -10,8 +10,8 @@ def flexibility_by_hour(D, cfg):
     D.index = D.index.tz_convert(cfg.tz)
     h = D.index.hour
     g = D.groupby(h).mean()
-    sh_series = D["thermal"] + D["ev_shift"]
-    sh = (g["thermal"] + g["ev_shift"]).reindex(range(24)).fillna(0).values
+    sh_series = D["thermal"] + D["shiftable"]
+    sh = (g["thermal"] + g["shiftable"]).reindex(range(24)).fillna(0).values
     S, dur = cfg.shift_window_h, cfg.request_duration_h
     up_e = np.array([sum(sh[(x + k) % 24] for k in list(range(-S, 0)) + list(range(dur, dur + S))) / dur for x in range(24)])
     cap = (sh_series.groupby(h).quantile(cfg.cap_quantile) - sh_series.groupby(h).mean()).clip(lower=0).reindex(range(24)).fillna(0).values

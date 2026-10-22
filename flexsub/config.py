@@ -17,17 +17,11 @@ class Config:
     gbm: dict = field(default_factory=lambda: dict(max_iter=300, learning_rate=0.05, max_leaf_nodes=15,
                                                    min_samples_leaf=20, l2_regularization=1.0, random_state=0))
     # M2 thermal
-    neutral_temp: float = 20.0      # counterfactual temperature (deg C); used when neutral_band is None
-    neutral_band: object = None     # (heating balance point, cooling balance point): counterfactual = temp clipped to the band
-    cdd_base: float = 24.0
-    hdd_base: float = 16.0
+    # M2 (weather-dependent load) has no hand-set temperatures: balance points are estimated from each substation's data
     # M3 decomposition
-    night_hours: Tuple[int, int] = (2, 6)
+    base_hours: int = 4                      # number of the home's own lowest-load hours used for the base level
     base_quantile: float = 0.1
     base_roll_days: int = 7
-    event_threshold_kw: float = 0.4          # excess over expected load that counts as a discrete event
-    meal_hours: Tuple[Tuple[int, int], ...] = ((12, 15), (18, 22))
-    meal_weekdays_only: bool = True
     # M4 flexibility
     shift_window_h: int = 3         # energy can be moved from +-this many hours
     request_duration_h: int = 2     # length of the upward request block

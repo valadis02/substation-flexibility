@@ -2,7 +2,7 @@
 
 Sources: REFIT README (CLEAN_READ_ME_081116.txt, appliance list "known at the beginning of the study" - see the notes
 there about swaps), UK-DALE ReadMe (channel -> appliance). Categories:
-  shiftable  washing machine, tumble dryer, washer dryer, dishwasher
+  shiftable  washing machine, tumble dryer, washer dryer, dishwasher, electric storage water heater
   thermal    electric heater, dehumidifier/heater, air conditioner
   ev         electric vehicle
   base       fridge/freezer (always on)
@@ -46,9 +46,17 @@ UKDALE_CHANNELS = {
 }
 
 
-def category(name):
+# Electric storage water heaters are shiftable (heat is stored); in UK-DALE "boiler" is a gas boiler (pump/controls only).
+ELECTRIC_WATER_HEATER = {"plegma": ("boiler",), "pecan_austin": ("waterheater",), "pecan_newyork": ("waterheater",),
+                         "pecan_california": ("waterheater",)}
+
+
+def category(name, dataset=None):
     n = name.lower()
-    if any(k in n for k in ("washing machine", "tumble dryer", "washer dryer", "washer_dryer", "dishwasher", "dish_washer", "dryer")):
+    if dataset in ELECTRIC_WATER_HEATER and n in ELECTRIC_WATER_HEATER[dataset]:
+        return "shiftable"
+    if any(k in n for k in ("washing machine", "washing_machine", "tumble dryer", "washer dryer", "washer_dryer", "dishwasher",
+                            "dish_washer", "dryer", "clotheswasher")):
         return "shiftable"
     if any(k in n for k in ("electric heater", "electric_heater", "dehumidifier", "air condition", "a/c", "ac_", "heater")):
         return "thermal"

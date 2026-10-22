@@ -8,8 +8,8 @@ def _fit(X, y, q, cfg):
     return HGB(loss="quantile", quantile=q, **cfg.gbm).fit(X, y)
 
 
-def rolling_origin(y, X, Xn, test_days, cfg):
-    """For each test day D: train on rows before D, predict the day. Xn is the neutral-weather feature matrix (thermal counterfactual)."""
+def rolling_origin(y, X, test_days, cfg):
+    """For each test day D: train on rows before D, predict the day."""
     idx = y.index
     ok = usable_rows(y, X)
     rows, models, last_fit = [], None, None
@@ -28,7 +28,6 @@ def rolling_origin(y, X, Xn, test_days, cfg):
         out["actual"] = y[te]
         for q, m in models.items():
             out[f"q{q}"] = m.predict(X.loc[te, cols])
-        out["thermal"] = out[f"q{cfg.quantiles[1]}"] - models[cfg.quantiles[1]].predict(Xn.loc[te, cols])
         rows.append(out)
     return pd.concat(rows)
 

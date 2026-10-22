@@ -1,3 +1,6 @@
+"""HISTORICAL: ran with method v0.3-v0.4 (gradient-boosting M2 with a neutral-temperature counterfactual), which was
+removed in v0.5. Results are in experiments/RESULTS.md; to rerun, check out the commit that added this script.
+"""
 """T2 diagnostic: thermal share with and without the clip at 0 (T0 = 20, full model, leave-one-week-out), per Plegma development home."""
 import sys, numpy as np, pandas as pd
 sys.path.insert(0, '.')

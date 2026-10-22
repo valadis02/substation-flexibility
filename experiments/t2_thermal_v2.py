@@ -1,3 +1,6 @@
+"""HISTORICAL: ran with method v0.3-v0.4 (gradient-boosting M2 with a neutral-temperature counterfactual), which was
+removed in v0.5. Results are in experiments/RESULTS.md; to rerun, check out the commit that added this script.
+"""
 """T2 v2 (development data only): thermal part (M2) after the T2 v1 findings.
 
 Changes tested against v1 (see experiments/RESULTS.md, T2):

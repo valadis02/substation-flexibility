@@ -1,0 +1,59 @@
+
+## plegma, ukdale, refit, pecan_austin, pecan_newyork (development split; medians over groups)
+
+|                                        |   energy_ratio |   corr_hourly |   corr_profile |   awfe_p90 |
+|:---------------------------------------|---------------:|--------------:|---------------:|-----------:|
+| ('pecan_austin', 5, 'm3_all_events')   |          2.464 |         0.494 |          0.805 |      0.2   |
+| ('pecan_austin', 5, 'm3_shift')        |          1.82  |         0.392 |          0.491 |      0.192 |
+| ('pecan_austin', 5, 'transfer_1')      |          0.693 |         0.157 |          0.349 |      0.113 |
+| ('pecan_austin', 5, 'transfer_all')    |          0.682 |         0.21  |          0.571 |      0.079 |
+| ('pecan_austin', 5, 'transfer_ext')    |          1.302 |         0.226 |          0.664 |      0.095 |
+| ('pecan_austin', 5, 'zero')            |          0     |       nan     |        nan     |      0.111 |
+| ('pecan_austin', 10, 'm3_all_events')  |          2.33  |         0.057 |          0.488 |      0.157 |
+| ('pecan_austin', 10, 'm3_shift')       |          1.708 |         0.035 |          0.147 |      0.157 |
+| ('pecan_austin', 10, 'transfer_1')     |          0.601 |         0.025 |          0.334 |      0.115 |
+| ('pecan_austin', 10, 'transfer_all')   |          0.52  |         0.033 |          0.501 |      0.098 |
+| ('pecan_austin', 10, 'transfer_ext')   |          1.283 |         0.031 |          0.459 |      0.09  |
+| ('pecan_austin', 10, 'zero')           |          0     |       nan     |        nan     |      0.125 |
+| ('pecan_austin', 16, 'm3_all_events')  |          2.529 |         0.063 |          0.61  |      0.151 |
+| ('pecan_austin', 16, 'm3_shift')       |          1.838 |         0.04  |          0.224 |      0.151 |
+| ('pecan_austin', 16, 'transfer_ext')   |          1.339 |         0.037 |          0.571 |      0.085 |
+| ('pecan_austin', 16, 'zero')           |          0     |       nan     |        nan     |      0.121 |
+| ('pecan_newyork', 5, 'm3_all_events')  |          1.753 |         0.672 |          0.915 |      0.227 |
+| ('pecan_newyork', 5, 'm3_shift')       |          1.258 |         0.497 |          0.573 |      0.221 |
+| ('pecan_newyork', 5, 'transfer_1')     |          0.88  |         0.351 |          0.539 |      0.188 |
+| ('pecan_newyork', 5, 'transfer_all')   |          0.554 |         0.468 |          0.828 |      0.165 |
+| ('pecan_newyork', 5, 'transfer_ext')   |          0.653 |         0.426 |          0.691 |      0.166 |
+| ('pecan_newyork', 5, 'zero')           |          0     |       nan     |        nan     |      0.223 |
+| ('pecan_newyork', 10, 'm3_all_events') |          1.945 |         0.687 |          0.916 |      0.187 |
+| ('pecan_newyork', 10, 'm3_shift')      |          1.404 |         0.484 |          0.625 |      0.193 |
+| ('pecan_newyork', 10, 'transfer_1')    |          1.229 |         0.304 |          0.568 |      0.168 |
+| ('pecan_newyork', 10, 'transfer_all')  |          0.744 |         0.369 |          0.715 |      0.148 |
+| ('pecan_newyork', 10, 'transfer_ext')  |          0.826 |         0.336 |          0.621 |      0.12  |
+| ('pecan_newyork', 10, 'zero')          |          0     |       nan     |        nan     |      0.174 |
+| ('pecan_newyork', 15, 'm3_all_events') |          2.144 |         0.652 |          0.918 |      0.17  |
+| ('pecan_newyork', 15, 'm3_shift')      |          1.551 |         0.437 |          0.586 |      0.169 |
+| ('pecan_newyork', 15, 'transfer_ext')  |          0.838 |         0.371 |          0.66  |      0.103 |
+| ('pecan_newyork', 15, 'zero')          |          0     |       nan     |        nan     |      0.152 |
+| ('plegma', 5, 'm3_all_events')         |          6.519 |         0.246 |          0.674 |      0.565 |
+| ('plegma', 5, 'm3_shift')              |          4.503 |         0.2   |          0.471 |      0.534 |
+| ('plegma', 5, 'transfer_1')            |          0.393 |         0.169 |          0.362 |      0.163 |
+| ('plegma', 5, 'transfer_all')          |          0.473 |         0.24  |          0.534 |      0.159 |
+| ('plegma', 5, 'transfer_ext')          |          1.108 |         0.232 |          0.513 |      0.129 |
+| ('plegma', 5, 'zero')                  |          0     |       nan     |        nan     |      0.18  |
+| ('refit', 5, 'm3_all_events')          |          1.475 |         0.513 |          0.812 |      0.309 |
+| ('refit', 5, 'm3_shift')               |          1.013 |         0.379 |          0.502 |      0.312 |
+| ('refit', 5, 'transfer_1')             |          0.568 |         0.362 |          0.525 |      0.284 |
+| ('refit', 5, 'transfer_all')           |          0.579 |         0.501 |          0.763 |      0.246 |
+| ('refit', 5, 'transfer_ext')           |          0.344 |         0.484 |          0.752 |      0.282 |
+| ('refit', 5, 'zero')                   |          0     |       nan     |        nan     |      0.321 |
+| ('refit', 10, 'm3_all_events')         |          1.383 |         0.571 |          0.841 |      0.229 |
+| ('refit', 10, 'm3_shift')              |          0.975 |         0.441 |          0.718 |      0.235 |
+| ('refit', 10, 'transfer_1')            |          0.485 |         0.438 |          0.573 |      0.236 |
+| ('refit', 10, 'transfer_all')          |          0.524 |         0.406 |          0.608 |      0.219 |
+| ('refit', 10, 'transfer_ext')          |          0.337 |         0.536 |          0.848 |      0.227 |
+| ('refit', 10, 'zero')                  |          0     |       nan     |        nan     |      0.273 |
+| ('refit', 13, 'm3_all_events')         |          1.517 |         0.586 |          0.845 |      0.223 |
+| ('refit', 13, 'm3_shift')              |          1.074 |         0.457 |          0.694 |      0.226 |
+| ('refit', 13, 'transfer_ext')          |          0.371 |         0.566 |          0.858 |      0.2   |
+| ('refit', 13, 'zero')                  |          0     |       nan     |        nan     |      0.244 |
