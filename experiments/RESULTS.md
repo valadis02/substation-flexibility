@@ -795,3 +795,25 @@ the last 14 days + EV). Days on which the request creates a new substation peak 
 0.92, Plegma 0.94 - always under (main source: level of air conditioning, 0.76-0.84). T8 rerun with v0.9
 (`results/t8_real_v09.md`, homes without EV): New York 0.315 -> 0.268 (P950 excluded); Ponocko-style ANN New York
 1 home 0.63, 20% 0.56, 50% 0.23 vs ours 0.25; Austin and REFIT unchanged.
+
+## T11 - Where the under-estimation comes from; REFIT over-estimation peaks [v0.9, diagnostics]
+
+**Under-estimation (Austin 0.74, New York 0.79 of the flexible energy).**
+- Weather part. Pecan "furnace" circuits are air handlers that also run on mild days (Austin 1.85 kW in the mildest
+  month). The part of the true HVAC load that is there on days inside the balance-point band is 17% (Austin) and 52%
+  (New York). It does not depend on temperature, so from hourly totals it is indistinguishable from base load. On the
+  temperature-driven part only, Austin est./true = 0.91. Annual harmonics are not the cause (0.83 vs 0.85 without).
+- Base allocated first takes 0.83 -> 0.76 of the Austin weather part (night AC in the quiet hours).
+  Tried: base from the weather-removed load: Austin energy 0.74 -> 0.81 but hourly AWFE 0.293 -> 0.299, Plegma
+  0.311 -> 0.497 (over 1.24). Rejected.
+- Appliances in Austin EV homes 0.36 (non-EV homes 0.78): ~5 kW US dryers pass as charging in EV homes. Tried:
+  EV only for runs >= 2 h: EV 0.70 -> 0.49, AWFE 0.293 -> 0.301. Rejected.
+
+**REFIT peaks of over-estimation.** The largest are 5-8 kW for an hour in homes where none of the 9 sub-metered
+circuits draws anything (e.g. H5 06-07 h, H3 18 h): unmetered loads (electric shower, immersion heater, cooking).
+Part is real flexibility missing from the truth (immersion heaters), part is not (showers, cooking). Tried: a power
+cap on appliance events (clip at 3 / 4 kW, drop > 4 kW): REFIT AWFE unchanged (0.242), New York slightly worse.
+Rejected.
+
+**Conclusion.** None of the four changes improves the hourly error without breaking another dataset. The remaining
+under-estimation is mostly HVAC load that runs regardless of weather, missed EVs in New York, and level-1 charging.
