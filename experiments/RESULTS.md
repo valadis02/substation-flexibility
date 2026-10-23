@@ -673,3 +673,117 @@ the flexible load, theirs vs ours on the same test days:
 3. Single homes (UK-DALE): with a long record (B1) ours beats zero; with 2-3 months (B2, B5) false events dominate the
    90th percentile and zero is better. The method is meant for aggregates and needs history; this is the expected
    failure mode, reported, not hidden.
+
+## T9 - EV charging and water heaters as flexible load [v0.9]
+
+**Question.** v0.8 counts as flexible only weather-dependent load and short appliance cycles (<= 3 h), and T8 left EV
+homes out. EV charging is central to OpenAIFlex. Can it be added from hourly smart-meter data alone, and what about
+water heaters?
+
+**Diagnosis (v0.8, per home).** EV energy caught as "appliance events": 9-54%; lost because sessions last > 3 h: 4-40%;
+below the 3-sigma threshold: 11-62%. Greek resistive water heaters (Plegma, ~1.2 kW): 36-59% already caught.
+New York water heaters are ~0.4 kW (heat-pump type), below any threshold; home P950 runs its water heater 98% of
+hours at ~1.1 kW, which in the hourly total is indistinguishable from always-on load.
+
+**Setup.** `experiments/t9_ev.py`. Groups: all development homes with sub-metered wet appliances present together,
+EV homes included (Pecan Austin, Pecan New York, REFIT 13, Plegma). Truth: flexible = weather (AC/heating) +
+shiftable (wet appliances + electric water heaters) + EV (car circuits). AWFE p90 as in T8.
+
+| Flexible AWFE p90 | zero | v0.8 | all long runs as EV | EV k=1.5 | **EV k=2.5, gate 2% (v0.9)** |
+|---|---|---|---|---|---|
+| Pecan Austin | 1.07 | 0.327 | 0.293 | 0.256 (EV x1.85) | **0.292** (EV x0.90) |
+| Pecan New York | 0.57 | 0.334 | 0.309 | 0.286 (EV x3.2) | **0.321** (EV x0.96) |
+| REFIT (no EV) | 0.32 | 0.249 | 0.278 (false 5.3 kWh/day) | 0.264 | **0.249** (no false EV) |
+| Plegma (no EV) | 0.87 | 0.312 | 0.312 | 0.366 | **0.312** (no false EV) |
+
+Sensitivity of v0.9 (k 2-3.5 kW, gate 1-3%): flexible AWFE Austin 0.280-0.313, New York 0.307-0.328, REFIT and
+Plegma unchanged at every setting. The EV energy itself is sensitive (est./true 0.2-1.8), so the EV level is the
+weak part. As implemented in `flexsub` (decompose_substation): Austin 0.325 -> 0.288, New York 0.322 -> 0.310, EV
+energy est./true 0.94 / 1.02.
+
+**Which homes.** Austin: 4/4 EV homes found, 3 of 16 non-EV homes also pass the gate. New York: 2 of 3 EV homes in
+the group found (the missed one charges at ~1.4 kW, level 1), 1 false. Group EV energy is right partly because misses
+and false homes cancel.
+
+**Conclusions.**
+1. Adopted as v0.9: EV is a separate flexible part (`down_ev_kw` in the envelope). Flexible error improves where EVs
+   exist and nothing changes where they do not.
+2. k = 2.5 kW is physical (level-2 chargers 3.3-7.2 kW); the 2% gate was read off development data (T3-EV) and is
+   flat between 1% and 3%.
+3. Not solved, and probably not solvable from hourly totals alone: level-1 charging, heat-pump water heaters and
+   always-on water heaters. If the DSO knows which customers have them (e.g. a night water-heating tariff, an EV
+   register), that is an input, like participation.
+4. Indicative: only 4 EV homes per region in the development data.
+5. M4 still uses the same +-3 h window for EV as for appliances; EV energy can usually move across the whole night,
+   so the upward EV flexibility is underestimated. Plug-in times are not in Pecan; needs another dataset or the
+   literature.
+
+## T9b / T9c - EV homes without false positives; actionable EV flexibility [v0.9]
+
+**Data changes.** P950 (New York; water heater on 98% of hours, half of the home's load) excluded from the data
+(`data/splits.json`, excluded). Heat-pump water heaters (Pecan water-heater circuits drawing < 1.5 kW when on) are a
+category of their own: not in the flexible truth, reported separately (New York: 17 kWh/day for the group, not
+estimated). Level-1 charging (~1.4 kW) is out of scope.
+
+**False EV homes (T9b).** The 3 false Austin homes were residual air conditioning (hot afternoons), the New York one a
+dryer. Added test: a charger draws flat power, so the median coefficient of variation of the hourly excess inside runs
+of >= 2 h must be <= 0.14 (EV homes 0.08-0.13, false 0.15-0.22). Threshold set on Austin, checked on New York.
+Result: Austin 4/4 EV homes, 0 false; New York 1/3 (P9053 is level 1; P1222 fails the test because a heater runs
+next to the car), 0 false; REFIT, Plegma 0. Script `experiments/t9b_v09.py`, table `results/t9b_v09.md`.
+
+| Flexible AWFE p90 | zero | v0.8 | v0.9 |
+|---|---|---|---|
+| Pecan Austin (20 homes) | 1.08 | 0.325 | **0.293** (EV energy x0.70) |
+| Pecan New York (17, no P950) | 0.46 | 0.248 | 0.248 (EV energy x0.21) |
+| REFIT, Plegma | | unchanged | unchanged |
+
+**Actionable EV flexibility (T9c, `flexsub/ev_flex.py`, `pipeline.ev_day_ahead`).** For the day ahead, each EV home
+is described by its detected sessions of the last 14 days (14 equally likely scenarios). Assumption: the car stays
+plugged in for 10 h from the session start (hourly meters do not show departures). Output per hour: expected EV kW,
+EVs plugged in, kW that can be postponed, kW that can be pulled in; and for a DSO request a plan per home ("P4767: no
+charging 18-21, finish 21-23") with the aggregate before/after and the rebound.
+Check against the car circuits, every development day (Austin 209, New York 133), request = the 3 busiest expected
+hours (reduce) or 01-04 (increase):
+
+| | predicted kW | real kW | ratio | day-to-day corr |
+|---|---|---|---|---|
+| Austin, reduce | 1.36 | 1.65 | 0.82 | 0.18 |
+| New York, reduce | 0.47 | 0.61 | 0.77 | 0.11 |
+| Austin, increase | 2.26 | <= 7.19 (energy that existed to move) | | |
+
+First version (one "median session" per home) overstated the reduction x2.2; scenarios fixed it. Day-to-day
+correlation is low: on average the plan is right, on a given day 4 cars are random. Dwell 6/10/14 h changes the
+increase (more hours plugged) but not the reduce. Rejected: dropping non-flat sessions one by one (EV energy x0.22).
+Open: estimated charging starts ~3 h earlier than the truth in Austin (peak 18-19 h vs 22 h) - other high loads in EV
+homes are still counted as charging; the rebound right after a reduce block makes a new peak (the plan should stagger
+it).
+
+## T9d - M6: EV as its own module; plug-in windows; staggered rebound [v0.9]
+
+**Structure.** EV is now M6 (`flexsub/ev.py`): detection, sessions, plug-in windows, day-ahead envelope and plan.
+M4 is weather-dependent + appliances only; total flexibility = M4 + M6. M3 uses the M6 detector only to keep
+charging hours out of the appliance events and the routine part.
+
+**EV timing (Austin, charging estimated ~3 h early).** Cause: residual air conditioning on hot afternoons in EV homes
+(7-49% of the detected EV energy per home). Tried and rejected, none improves: (a) accept hot-day sessions only at
+the home's usual cool-day charging hours (kills P8156, which has 2 cool-day sessions); (b) temperature-matched
+reference (same-hour level from the 10 days of closest temperature): unchanged; (c) session classifier trained on
+public sub-metered homes, leave-one-home-out: energy recall 0.14-0.31 vs 0.35-0.83 for the rule. With 4+3 EV homes
+this is the limit of the data; a learned classifier needs many more EV homes (full Pecan Dataport).
+
+**Plug-in window.** Not observable in hourly data, so it is bounded. Household away-time from the home's own load
+profile (morning drop) was tried: no clear away period in 4 of 7 homes, and 9-62% of the true charging falls in the
+"away" hours (people leave, the car does not). Two windows kept: 'dwell' 10 h (default) and 'observed' (hours the
+car has been seen charging on >= 2 of the last 28 days; safe floor). Script `experiments/t9d_ev_plan.py`, table
+`results/t9d_ev_plan.md`:
+
+| Reduce request (3 busiest EV hours) | window | predicted kW | real kW | predicted/real |
+|---|---|---|---|---|
+| Austin | dwell 10 h | 1.39 | 1.60 | 0.87 |
+| Austin | observed | 0.65 | 1.18 | 0.55 |
+| New York | dwell 10 h | 0.49 | 0.62 | 0.79 |
+| New York | observed | 0.14 | 0.41 | 0.33 |
+
+**Rebound.** Postponed energy is placed by valley filling on the expected substation load (non-EV same-hour mean of
+the last 14 days + EV). Days on which the request creates a new substation peak after the block: Austin 27% -> 0%
+(dwell), 22% -> 3% (observed); New York 6% -> 0%.

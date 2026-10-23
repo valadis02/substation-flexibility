@@ -3,14 +3,15 @@ Parts sum to the actual load.
 
 Per home (smart-meter data of that home only):
   base       always-on level: low quantile of the home's load in its own lowest-load hours of the day
+  ev         EV charging (M6, `ev.ev_home`, v0.9): long high-power runs, after removing the home's weather load
   shiftable  discrete appliance events found from the data only (`shiftable.events_home`, T3 v2 design A), after
-             removing the home's weather-dependent load (M2 fitted on the home)
+             removing the home's weather-dependent load (M2 fitted on the home); EV hours excluded
 Substation:
-  weather-dependent load from the aggregate (M2), allocated after the base; then shiftable; the rest is routine.
+  weather-dependent load from the aggregate (M2), allocated after the base; then EV; then shiftable; the rest is routine.
 """
 import numpy as np
 import pandas as pd
-from . import features, thermal_dd, shiftable
+from . import features, thermal_dd, shiftable, ev as m6
 
 
 def _home_weather_load(s, w, tz):
@@ -35,9 +36,11 @@ def house_parts(s, w, cfg):
     nd = night.index.tz_convert(cfg.tz).normalize()
     base_d = night.groupby(nd).quantile(cfg.base_quantile).rolling(cfg.base_roll_days, min_periods=3).median()
     base = pd.Series(base_d.reindex(loc.normalize()).values, index=idx).bfill()
-    ev = shiftable.events_home(s, weather_load=_home_weather_load(s, w, cfg.tz))
-    ok = s.notna() & ev.notna()
-    return pd.DataFrame({"actual": s, "base": np.minimum(base, s), "shiftable": ev.fillna(0.0), "ok": ok})
+    wl = _home_weather_load(s, w, cfg.tz)
+    ev, ev_mask = m6.ev_home(s, k=cfg.ev_k, gate=cfg.ev_gate, max_cv=cfg.ev_max_cv, weather_load=wl)
+    sh = shiftable.events_home(s, weather_load=wl).where(~ev_mask, 0.0)       # an EV hour is not also an appliance event
+    ok = s.notna() & sh.notna() & ev.notna()
+    return pd.DataFrame({"actual": s, "base": np.minimum(base, s), "ev": ev.fillna(0.0), "shiftable": sh.fillna(0.0), "ok": ok})
 
 
 def decompose_substation(W, w, thermal, cfg):
@@ -45,12 +48,12 @@ def decompose_substation(W, w, thermal, cfg):
     the parts sum to the load."""
     parts = [house_parts(W[h], w, cfg) for h in W.columns]
     ok = pd.concat([p["ok"] for p in parts], axis=1).all(axis=1)
-    S = sum(p[["actual", "base", "shiftable"]] for p in parts)
+    S = sum(p[["actual", "base", "ev", "shiftable"]] for p in parts)
     S = S[ok & thermal.reindex(S.index).notna()]
     th = thermal.reindex(S.index)
     out = pd.DataFrame(index=S.index)
     rem = S["actual"].copy()
-    for name, val in (("base", S["base"]), ("thermal", th), ("shiftable", S["shiftable"])):
+    for name, val in (("base", S["base"]), ("thermal", th), ("ev", S["ev"]), ("shiftable", S["shiftable"])):
         a = np.minimum(val.clip(lower=0), rem)
         out[name] = a
         rem = rem - a

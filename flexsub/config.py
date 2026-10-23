@@ -22,6 +22,12 @@ class Config:
     base_hours: int = 4                      # number of the home's own lowest-load hours used for the base level
     base_quantile: float = 0.1
     base_roll_days: int = 7
+    # M6 EV charging (v0.9, flexsub.ev): excess over the same-hour reference > ev_k kW, any run length; home gate ev_gate
+    ev_k: float = 2.5
+    ev_gate: float = 0.02
+    ev_max_cv: float = 0.14          # flat charging power (T9b)
+    ev_dwell_h: int = 10             # plug-in window from session start (behavioural assumption, T9c)
+    ev_history_days: int = 14        # sessions used as day-ahead scenarios
     # M4 flexibility
     shift_window_h: int = 3         # energy can be moved from +-this many hours
     request_duration_h: int = 2     # length of the upward request block

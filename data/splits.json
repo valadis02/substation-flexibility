@@ -107,7 +107,9 @@
    }
   },
   "pecan_newyork": {
-   "excluded": [],
+   "excluded": [
+    "P950"
+   ],
    "held_out_homes": [
     "P2096",
     "P27",
