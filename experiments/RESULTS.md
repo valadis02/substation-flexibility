@@ -787,3 +787,11 @@ car has been seen charging on >= 2 of the last 28 days; safe floor). Script `exp
 **Rebound.** Postponed energy is placed by valley filling on the expected substation load (non-EV same-hour mean of
 the last 14 days + EV). Days on which the request creates a new substation peak after the block: Austin 27% -> 0%
 (dwell), 22% -> 3% (observed); New York 6% -> 0%.
+
+## T10 - Final figures, method v0.9 [v0.9]
+
+`experiments/t10_final_figures.py` (T9 groups, EV homes included, P950 excluded): `figures/final_days.png`,
+`figures/final_cdf.png`, `figures/m6_plan.png`. Flexible load, est./true energy: Austin 0.74, New York 0.79, REFIT
+0.92, Plegma 0.94 - always under (main source: level of air conditioning, 0.76-0.84). T8 rerun with v0.9
+(`results/t8_real_v09.md`, homes without EV): New York 0.315 -> 0.268 (P950 excluded); Ponocko-style ANN New York
+1 home 0.63, 20% 0.56, 50% 0.23 vs ours 0.25; Austin and REFIT unchanged.
