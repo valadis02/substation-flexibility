@@ -56,9 +56,7 @@ for ds in a.datasets:
         if not np.isnan(band[0]):
             wl[okk] = thermal_dd.fit_predict(y, wy, tz, band, okk, okk, gate=True)
         A_ev2[h] = shiftable.events_home(y, weather_load=wl).reindex(W.index)
-        P = house_parts(y.tz_convert(tz), d["weather"].reindex(y.index).tz_convert(tz), cfg)
-        P.index = P.index.tz_convert("UTC")
-        old[h] = P["ev_shift"].reindex(W.index)
+        old[h] = pd.Series(np.nan, index=W.index)   # old M3 events (v0.6) were removed in v0.7; see RESULTS.md T3 v2
     homes = sorted(T)
     T = pd.DataFrame(T)
     DATA[ds] = dict(tz=tz, Y=W[homes], T=T, A=pd.DataFrame(A_ev), A2=pd.DataFrame(A_ev2), old=pd.DataFrame(old), homes=homes,
@@ -86,7 +84,7 @@ for ds, D in DATA.items():
                 continue
             y, tt = Y.loc[m, mem].sum(axis=1), T.loc[m, mem].sum(axis=1)
             k = shiftable._key(y.index, tz)
-            est = {"zero": 0 * y, "old_m3_events": D["old"].loc[m, mem].sum(axis=1).fillna(0),
+            est = {"zero": 0 * y,
                    "A_events": D["A"].loc[m, mem].sum(axis=1), "A2_events_minus_weather": D["A2"].loc[m, mem].sum(axis=1)}
             day = y.index.tz_convert(tz).normalize()
             for sel in ("mean", "weighted"):
@@ -99,6 +97,17 @@ for ds, D in DATA.items():
                     est[f"B_{sel}_{lev}"] = e
                     chosen[sel] = wts.idxmax()
             zero_awfe = metrics.awfe_p90(0 * y / y, tt / y)
+            # Ponocko-style reference: share profile from ONE sub-metered home outside the group (median over donors)
+            others = [h for h in homes if h not in mem]
+            if others:
+                Yo, To = D["Y"][others], T[others]
+                kk = shiftable._key(D["Y"].index, tz)
+                aws = []
+                for h in others:
+                    sh = To[h].groupby(kk).sum() / Yo[h].where(To[h].notna()).groupby(kk).sum()
+                    aws.append(metrics.awfe_p90((y * k.map(sh).fillna(0).values) / y, tt / y))
+                rows.append(dict(dataset=ds, N=N, group=g, method="transfer_1_submetered_home", hours=int(m.sum()),
+                                 awfe_p90=float(np.median(aws)), awfe_skill=1 - float(np.median(aws)) / zero_awfe))
             for name, e in est.items():
                 c = lambda u, v: float(np.corrcoef(u, v)[0, 1]) if np.std(u) > 0 else np.nan
                 aw = metrics.awfe_p90(e / y, tt / y)

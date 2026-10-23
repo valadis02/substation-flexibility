@@ -2,7 +2,8 @@
 
 Two alternatives are kept side by side until one is chosen (see experiments/RESULTS.md, T3 v2):
 
-A. `events` - data only. Per home, the expected load is the median of the same hour over the previous 14 days; an
+A. `events` - data only. Per home, the expected load is the 60th percentile of the same hour over the previous 14
+   days (v0.8; the median until v0.7 counted ordinary activity - cooking, heating - as appliance events); an
    hour is an appliance event if the excess over it is larger than k robust standard deviations of that home's own
    excess (k = 3), and the run of such hours is short (<= max_run_h hours, an appliance cycle; longer runs are AC, EV,
    heating). Shiftable load = the excess in those hours.
@@ -22,12 +23,13 @@ def _key(idx, tz):
 
 
 # ---------------- A: events from the data only ----------------
-def events_home(y, k=3.0, max_run_h=3, window_days=14, weather_load=None):
+def events_home(y, k=3.0, max_run_h=3, window_days=14, weather_load=None, base_quantile=0.6):
     """Hourly shiftable estimate (kW) for one home from its own hourly load (index tz-aware, complete hourly).
-    weather_load: optional weather-dependent load (M2) of the home, removed before looking for events."""
+    weather_load: optional weather-dependent load (M2) of the home, removed before looking for events.
+    base_quantile: quantile of the same hour over the previous window_days used as the expected load."""
     if weather_load is not None:
         y = y - weather_load.reindex(y.index).fillna(0)
-    base = y.groupby(y.index.hour).transform(lambda s: s.rolling(window_days, min_periods=7).median().shift(1))
+    base = y.groupby(y.index.hour).transform(lambda s: s.rolling(window_days, min_periods=7).quantile(base_quantile).shift(1))
     exc = y - base
     mad = (exc - exc.rolling(24 * window_days, min_periods=24 * 7).median()).abs().rolling(24 * window_days, min_periods=24 * 7).median().shift(1)
     thr = k * 1.4826 * mad

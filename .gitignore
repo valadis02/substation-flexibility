@@ -10,3 +10,5 @@ __pycache__/
 *.pdf.bak
 # Pecan Street Dataport: licence forbids redistribution
 data/processed/pecan*/
+data/crest/
+data/crest_indep/

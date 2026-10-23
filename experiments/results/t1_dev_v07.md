@@ -30,3 +30,12 @@ Medians over groups. cov = share of hours inside the band (target 0.90 after cal
 |   1 |        4 |  3267.5 |     0.299 |     0.812 |     0.897 |           2.514 |        4.582 |         0.688 |
 |   2 |        3 |  1966   |     0.966 |     0.777 |     0.895 |           2.018 |        3.313 |         0.549 |
 |   5 |        1 |  1157   |     2.173 |     0.75  |     0.884 |           1.393 |        2.228 |         0.364 |
+
+## ukdale (development split, weather=yes, retrain every 7 d, seed 0)
+
+Medians over groups. cov = share of hours inside the band (target 0.90 after calibration); width/IS/nMAE relative to mean load.
+
+|   N |   groups |   hours |   mean_kw |   cov_raw |   cov_cal |   width_cal_rel |   is_cal_rel |   nmae_median |
+|----:|---------:|--------:|----------:|----------:|----------:|----------------:|-------------:|--------------:|
+|   1 |        4 |  2007.5 |     0.382 |     0.752 |     0.904 |           1.356 |        2.316 |         0.345 |
+|   2 |        3 |  1463   |     0.726 |     0.748 |     0.89  |           1.097 |        1.763 |         0.281 |

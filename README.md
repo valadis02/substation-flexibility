@@ -1,35 +1,57 @@
 # substation-flexibility (`flexsub`)
 
-Estimates the flexibility of a **substation** (a group of households) from **aggregate hourly smart-meter data, weather and calendar only**: no sub-metering, no demand-response signal, no NILM.
+Estimates the flexibility of a **substation** (a group of households) from **hourly smart-meter data of each home,
+weather and calendar only**: no sub-metering, no demand-response signal, no NILM.
 
-**Status: experimental. Not validated against ground truth.** The test plan is in `docs/test_plan.pdf`.
+**Status: v0.8, research code.** All results so far are on development data (`data/splits.json`); the locked final test
+(last 20% of time per home + held-out homes) is run once the method is frozen. Full record of experiments and
+conclusions: `experiments/RESULTS.md`; one line per method version: `docs/experiment_log.md`; sources:
+`docs/references.md`.
 
 ## Problem
-A DSO deciding between reinforcement and flexibility needs, per area and hour, how many kW can go down or up, for how long, and with what confidence. Existing work needs sub-metering (Ponocko & Milanovic 2018; Wang et al., NREL), a DR signal, or covers only thermal load and only reductions (Albert & Rajagopal 2015; Dyson et al. 2014).
+A DSO deciding between reinforcement and flexibility needs, per area and hour, how many kW can go down or up, for how
+long, and with what confidence. Existing methods need sub-metering in part of the homes (Ponocko & Milanovic 2017/2018:
+20-50% in their first paper, 5% claimed in the second, not reproduced here), a DR signal, or cover only thermal load.
 
-## Method (modules)
+## Method (v0.8)
 | Module | File | What it does |
 |---|---|---|
-| M1 baseline | `flexsub/baseline.py` | quantile regression (5/50/95%) + conformal calibration, rolling-origin |
-| M2 thermal | `flexsub/thermal.py` | prediction with actual weather minus prediction with neutral weather (20 C), leave-one-day-out |
-| M3 decomposition | `flexsub/decompose.py` | base / thermal / shiftable events / meal events / routine; parts sum to the load |
-| M4 flexibility | `flexsub/flexibility.py` | down = shiftable load running; up = energy movable from +-3 h, capped by observed extra draw |
-| M5 participation | `flexsub/flexibility.py` | scenario scaling (default 30%) |
-| M6 substation | `flexsub/pipeline.py` | aggregate first, then apply M1-M5 |
+| M1 baseline | `flexsub/baseline.py` | quantile gradient boosting (5/50/95%), conformal calibration, rolling origin; seasonal features, no hand-set temperatures |
+| M2 weather-dependent load | `flexsub/thermal_dd.py`, `thermal.py` | degree-day component relative to balance points estimated from the substation's own data; kept only if significant (Newey-West t > 2) |
+| M3 shiftable load | `flexsub/shiftable.py`, `decompose.py` | per home, after removing its weather load: load above the 60th percentile of the same hour over the previous 14 days by > 3 robust SD, runs <= 3 h |
+| M4 flexibility envelope | `flexsub/flexibility.py` | down / up per hour; window, request duration and cap are user-facing product definitions |
+| M5 participation | `flexsub/flexibility.py`, `pipeline.py` | default 1.0 (technical maximum); scenarios = enrolment x response, per substation |
 
-All parameters are in `flexsub/config.py`. Many are assumptions (0.4 kW threshold, meal hours, +-3 h window, 30% participation); the tests are meant to show which ones must change.
+Parameters: `flexsub/config.py`. The remaining fixed values sit in flat regions of the sensitivity tests (T3 v3, T4)
+or are product definitions.
+
+## Main results (development data)
+| Test | Result |
+|---|---|
+| T1 baseline band (LCL 50/150/500 homes) | coverage ~0.90 at target 0.90; width 0.41 / 0.30 / 0.23 of load |
+| T2 weather-dependent load | share ratio est./true Austin 0.89, Ithaca 0.98; false weather load cut by the significance gate (REFIT 0.21 -> 0.02) |
+| T3 shiftable load | AWFE skill vs zero 0.17-0.27 on real data without any sub-metering |
+| T4 envelope | down est./true 0.58-0.85, up 0.99-1.23; settings change size, not accuracy |
+| T7 vs Ponocko & Milanovic (CREST, 1,000 homes) | wet appliances: ours (0% sub-metering) 0.087 AWFE p90 vs their 5% 0.115 and 10% 0.080; their 5% headline (<0.1) not reproduced (0.26-0.33) |
+| T8 real vs estimated (REFIT 13, Pecan Austin 16, New York 15 homes) | flexible-load AWFE p90 0.24-0.32 vs zero 0.32-1.00; better than a Ponocko-style ANN with 20% sub-metering (hourly P only) |
 
 ## Quick start
 ```bash
 pip install -r requirements.txt
 pip install -e .
-pytest -q                                  # synthetic sanity tests (~15 s)
-python experiments/run_synthetic_demo.py
-python scripts/run_pipeline.py --data "data/raw/*.csv" --weather data/weather.csv --start 2026-09-20 --end 2026-10-15
+pytest -q                                            # synthetic sanity tests (~15 s)
+python scripts/run_pipeline.py --help                # run the method on your own hourly data + weather
+python experiments/t1_baseline.py refit             # any experiment; see the header of each script
 ```
 
+## Data
+`data/processed/` holds the prepared public datasets (REFIT, UK-DALE, Plegma, LCL groups); preparation scripts are in
+`scripts/` and sources/licences in `data/README.md`. Pecan Street data is used locally only (its licence forbids
+redistribution). CREST synthetic homes are regenerated with `scripts/crest_generate.py` (not committed).
+
 ## Layout
-`flexsub/` code · `tests/` synthetic tests · `experiments/` one script per test of the plan · `docs/` plan and experiment log · `data/` local data only (not committed) · `legacy/` first exploration scripts.
+`flexsub/` code · `tests/` synthetic tests · `experiments/` one script per test + `RESULTS.md` · `docs/` test plan,
+experiment log, references · `data/` processed public data and splits · `legacy/` first exploration scripts.
 
 ## License
 Not chosen yet (decide with the lab before publishing).

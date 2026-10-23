@@ -6,7 +6,8 @@ Status: *read* = full text read; *abstract* = only abstract/summary seen; *to re
 
 ## 1. Flexibility from smart-meter data (closest work)
 
-- **[10] Ponoćko J., Milanović J.V., "Forecasting demand flexibility of aggregated residential load using smart meter data", IEEE Trans. Power Systems 33(5), 5446–5455, 2018.** Main comparison: needs >=5% sub-metering; AWFE metric; Pecan Street validation. *read*
+- **[10] Ponoćko J., Milanović J.V., "Forecasting demand flexibility of aggregated residential load using smart meter data", IEEE Trans. Power Systems 33(5), 5446–5455, 2018.** Main comparison: claims 5% sub-metering is enough (AWFE p90 <0.1) - not reproduced in T7 (5% gives 0.26-0.33); AWFE metric; Pecan Street validation. *read*
+- **[10b] Ponoćko J., Milanović J.V., "Smart meter-driven estimation of residential load flexibility", CIRED 2017.** Earlier version of [10]: same idea, CREST 1,000 homes, 7 categories, ANN not specified beyond "two-layer feed-forward, back-propagation"; AWFE in % of the load at that time step (not of the monthly mean). Coverage 20/50/80%: active controllable AWFE p90 5% (100%), ~6% (20%); reactive ~10% at 20%; **50% taken as the optimal coverage** for active and reactive together. *read*
 - **[11] Wang J., Ding F., Zhu X., Xuan K., Yao Y., "Estimating flexibility envelopes for residential customers from utility smart meter data", IEEE PES T&D, 2026 (NREL preprint).** Flexibility envelopes from utility smart-meter data. *abstract*
 - **[6] Albert A., Rajagopal R., "Thermal profiling of residential energy use", IEEE Trans. Power Systems 30(2), 2015.** Thermal response from smart-meter + weather; segmentation, no flexibility quantity. *abstract*
 - **[7] Dyson M.E.H., Borgeson S.D., Tabone M.D., Callaway D.S., "Using smart meter data to estimate demand response potential, with application to solar energy integration", Energy Policy 73, 607–619, 2014.** AC DR potential from smart-meter data (30,000 CA homes). *abstract*

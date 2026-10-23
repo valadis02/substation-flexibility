@@ -474,3 +474,202 @@ Effect of the settings:
    flat regions (T3 v3) or are user-facing definitions.
 
 **Next.** T5 (ablations: without weather, without calibration, without M2, without M3) on v0.7.
+
+**Like-for-like comparison with a Ponocko-style reference (same truth incl. water heaters, same groups).** AWFE p90,
+lower is better; "1 sub-metered home" = share profile from one sub-metered home outside the group (~7-20% of the
+group sub-metered), median over donor homes:
+
+| Group | zero | 1 sub-metered home | Design A v0.7 | Design A v0.8 (no sub-metering) | Design B (bank, share x load) |
+|---|---|---|---|---|---|
+| Austin, 10 homes | 0.126 | 0.115 | 0.105 | **0.102** | 0.167 |
+| Ithaca, 10 homes | 0.247 | 0.237 | 0.175 | 0.177 | **0.148** |
+| REFIT, 10 homes | 0.239 | 0.240 | 0.234 | 0.220 | **0.155** |
+| Plegma, 5 homes | 0.399 | 0.362 | 0.331 | 0.331 | **0.280** |
+
+Design A is at least as good as the one-sub-metered-home reference in every dataset. This reference is a simplified
+version of the sub-metering idea (one donor), not Ponocko & Milanovic's ANN with 5% of 1,000 homes sub-metered, and
+their AWFE values come from their data and category set, so their 0.23 (0%) / <0.1 (5%) cannot be placed on this scale
+directly; AWFE also depends strongly on the dataset (zero reference 0.12-0.40).
+
+## T7 - Ponocko & Milanovic (2018) reproduced on CREST, and compared with ours [v0.7]
+
+**Why.** Their published numbers (AWFE p90 0.23 at 0% sub-metering, <0.1 at 5%) are for their own CREST population,
+their "controllable" category (wet appliances + cold appliances + water/space heating) and one test day; our method
+does not estimate cold appliances, so their numbers cannot be placed next to ours directly. We rebuilt their setting
+and ran both methods on the same homes.
+
+**Data.** `scripts/crest_generate.py`: 1,000 synthetic UK homes (CREST / richardsonpy, UK occupancy mix of the paper),
+60 days from 1 January, 1-minute P, Q (from the appliance power factors of the CREST table) and the six categories of
+their Table I. A bug in richardsonpy (activity table read with 5 instead of 6 activities per occupancy level, so laundry
+used the TV probabilities) made wet appliances 2-3x too frequent (13-14 kWh/day per home); the script patches it at run
+time (8.8 kWh/day, UK level). A second, independent population (500 homes, seed 2) is used for their 0% case.
+
+**Their method** (`flexsub/ponocko.py`): inputs P, Q per minute in p.u. of the monthly maximum; 44 log-sigmoid hidden
+neurons, tan-sigmoid outputs, Bayesian regularization (Levenberg-Marquardt + MacKay, as MATLAB `trainbr`); trained on
+the 7 days before the test day using the sub-metered homes; applied to the P, Q of all 1,000 homes. The paper quotes
+n = N/(d ln N) for the hidden layer, which gives 547 for N = 7 x 1440, not 44; we use 44 as reported.
+0% case: trained on the independent CREST population (their 0% uses UK statistics; same-model training data is the
+most favourable version of it). AWFE (their eq. 9) = |estimate - truth| in p.u. of the average monthly load.
+
+**Ours**: M3 design A per home from its hourly total load only (no sub-metering, no reactive power). It needs ~21
+days of history per home, so test days are days 24, 28, ..., 52 (8 days); 3 random sub-metered subsets for 5/10/20%.
+
+**Results** (median over test days and subsets of the AWFE p90; `experiments/results/t7_ponocko_crest.md`):
+
+| Target | zero | Ours (0%) | Ponocko 0% (indep. CREST) | 5% | 10% | 20% | 100% |
+|---|---|---|---|---|---|---|---|
+| Wet appliances (CTIM1), hourly | 0.292 | 0.156 (0.13-0.19) | 0.043 | 0.103 (0.06-0.19) | 0.079 | 0.063 | 0.041 |
+| Wet appliances, energy est/true | - | 1.50 | 0.99 | 1.23 | 1.17 | 1.11 | 1.00 |
+| Their "controllable", 1-minute | 0.533 | - | 0.080 | 0.332 (0.15-0.54) | 0.164 | 0.115 | 0.079 |
+
+**Conclusions.**
+1. Their method is reproduced at 100% sub-metering (0.08 controllable, ~0.04 wet), but **their 5% result is not**:
+   0.33 (0.15-0.54 across days and subsets) instead of <0.1; ~0.1 needs 20%. With 50 homes the training aggregate
+   is much spikier than the 1,000-home aggregate it is applied to, so the network extrapolates.
+2. Training on another population of the same model (our "0%") is as good as 100% sub-metering. On CREST this is
+   expected (same generator), so it is an upper bound, not their 0.23; it does say that **transfer from a similar
+   sub-metered population works when the populations match** - the idea of our design B (profile bank).
+3. **Ours vs theirs on the common part (wet appliances):** ours with no sub-metering 0.156 is between zero (0.29) and
+   their 5% (0.10): skill 0.47 vs 0.65. Ours overestimates energy x1.5: the events also catch other short spikes
+   (kettle, oven, electric shower). On CREST - their home ground, with clean appliance signatures and reactive power -
+   their 5% is better than ours; but their 5% is also unstable (0.06-0.19 across subsets) and far from the paper on the
+   headline category.
+4. To answer "closer to 0% or to 5%": on CREST, ours closes ~half of the gap between zero and their 5% for wet
+   appliances, with no sub-metering and no reactive power.
+
+**Robustness of the 5% result** (days 24, 32, 40, 48; AWFE p90, median and 10th-90th percentile over days x
+subsets; `experiments/results/t7b_*.md`):
+
+| Variant | Controllable 1-min, 5% | 10% | Wet appliances hourly, 5% | 10% |
+|---|---|---|---|---|
+| 10 random subsets | 0.26 (0.19-0.38) | 0.16 (0.12-0.20) | 0.11 (0.09-0.15) | 0.07 (0.06-0.10) |
+| 5 subsets with the population's household-size mix | 0.26 (0.19-0.48) | 0.18 (0.13-0.28) | 0.11 (0.07-0.15) | 0.08 (0.06-0.10) |
+| Best training (1,000 epochs, best of 3 initialisations) | 0.30 (0.24-0.47) | - | 0.10 (0.08-0.14) | - |
+| Ours, no sub-metering | - | - | 0.17 (0.14-0.18) | |
+| Zero | 0.58 | | 0.31 | |
+
+5. The 5% result is robust to the subset (random or representative) and to the training: 0.26-0.30 for the headline
+   category, never below 0.16 in 90% of the cases; the paper's <0.1 at 5% (and "5% close to 100%") is not reproduced.
+   ~0.1 is reached between 10% and 20%. (Remaining differences we cannot remove: their own CREST population, one test
+   day, MATLAB details not given in the paper.)
+5b. Their own earlier paper (CIRED 2017 [10b], same idea, CREST, 1,000 homes) tested 20/50/80% and measures AWFE as a
+   share of the load at that time step. In that unit their active controllable error is 0.05 at 100% and ~0.06 at 20%
+   (their ~0.10 at 20% is for reactive load); they call 50% the optimal coverage for active and reactive together. In
+   the same unit our reproduction gives 0.073 (100%), 0.074 (50%), 0.098 (20%), 0.135 (10%), 0.176 (5%) (T7c, 8 days).
+   So our implementation is ~0.02-0.04 less accurate than theirs at high coverage and the gap grows as coverage falls;
+   the 5% claim of [10] is the one furthest from what we get.
+6. On wet appliances, ours (0.17) is above their 5% (0.11) and 10% (0.07): AWFE skill 0.45 vs 0.65 (5%), i.e. ours
+   closes ~70% of the gap between zero and their 5%, without sub-metering and without reactive power.
+
+**Next.** (a) Reduce the ~x1.5 overestimate of design A (separate kettle/oven/shower spikes, e.g. by duration within
+the hour or time of day) and rerun T7; (b) design B on CREST with the bank built from REFIT/UK-DALE (real UK data,
+not the same generator) - a fair 0% transfer; (c) T5 ablations.
+
+## T3 v4 - Fewer false events in design A [v0.8]
+
+**Problem.** On CREST design A overestimated wet-appliance energy x1.5 (T7). Diagnosis on the real development data
+(`events_home`, A2): in 25-55% of the event hours no shiftable appliance runs (Austin 54%, Plegma 55%, REFIT 52%,
+New York 37%, UK-DALE 25%); CREST is no different (58%). On real data the total energy came out ~right only because
+the false events cancel missed cycles. False events: ordinary activity (cooking, heating) that happens on fewer than
+half of the days at that hour, so the median of the same hour does not contain it. Neither run length nor "habit"
+(how often the home has an event at that hour) separates them consistently across datasets; event size does (small
+excess -> mostly false), but needs an absolute kWh threshold.
+
+**Variants tested on the real development data only** (8 groups of 10 homes, Plegma 5; AWFE skill, change vs v0.7,
+median [min, max] over groups): baseline quantile 0.6 / 0.7 instead of the median, k = 4 / 5, run <= 2 h, dropping events
+below half the home's typical event size.
+
+| Variant | Austin | New York | Plegma | REFIT |
+|---|---|---|---|---|
+| base = 60th percentile | +0.045 [+0.024, +0.076] | -0.008 [-0.015, 0.000] | +0.002 [-0.002, +0.041] | +0.034 [+0.026, +0.050] |
+| base = 70th percentile | +0.082 | -0.033 | -0.012 | +0.038 |
+| k = 4 | +0.034 | -0.021 | -0.014 | -0.005 |
+
+The 60th percentile is the only variant that does not hurt any dataset; adopted in v0.8 (`shiftable.events_home`,
+`base_quantile=0.6`; the median version is removed). It was then applied once to CREST, with no tuning there.
+
+**Results v0.8.**
+- Real data, full T3 v2 harness (largest group, AWFE skill v0.7 -> v0.8): Austin 0.228 -> 0.268, New York 0.229 ->
+  0.210, Plegma 0.171 -> 0.172, REFIT 0.160 -> 0.212; energy ratio Austin 0.99 -> 0.83, REFIT 1.15 -> 1.01, Plegma 1.21
+  -> 1.22, New York 0.37 -> 0.32 (New York stays low: the always-on water heater of T3 v3).
+- CREST (T7 setting, wet appliances, hourly AWFE p90, days 24-52): 0.156 -> **0.088** (0.07-0.11), energy x1.5 ->
+  x1.15. Ponocko & Milanovic: 5% 0.10-0.11, 10% 0.07-0.08.
+
+**Conclusions.**
+1. With no sub-metering and no reactive power, design A now estimates wet-appliance load on CREST between their 5%
+   and 10% sub-metering. Their own CIRED 2017 version needs 20-50% for the headline category [10b].
+2. On their headline "controllable" category (wet + cold + water/space heating), ours estimates only the wet part on
+   CREST (no weather in CREST, so M2 finds nothing; cold appliances are not estimated): AWFE p90 0.245, about equal
+   to their 5% (0.24-0.29 hourly) and worse than 10% (0.14-0.16). A fair comparison of total flexibility needs real
+   weather-dependent data (Pecan Austin, as in their validation).
+3. The New York loss (-0.02 skill) is small and within the spread of the other variants; noted, not hidden.
+
+## T7c - Analogue of their Fig. 6 and Fig. 7, with our method [v0.8]
+
+`experiments/t7c_figures.py`; figures in `experiments/results/figures/t7c_fig6_cdf.png` and `t7c_fig7_composition.png`;
+table in `experiments/results/t7c_figures.md`. 1,000 CREST homes, 8 test days, one random sub-metered subset per
+coverage. Space heating is given to our method as known (CREST has no weather; in real data M2 estimates it) - it is
+small in CREST (~0.05 kWh/day per home, few homes own it). Cold appliances and water heaters are not given.
+
+AWFE p90, hourly, p.u. of the average monthly load (median over days):
+
+| Method | Controllable (wet + cold + water/space heating) | Wet appliances |
+|---|---|---|
+| zero | 0.515 | 0.292 |
+| **Ours, 0% sub-metering** | **0.236** | **0.087** |
+| Ponocko 5% | 0.264 | 0.115 |
+| Ponocko 10% | 0.162 | 0.080 |
+| Ponocko 20% | 0.091 | 0.059 |
+| Ponocko 50% | 0.059 | 0.043 |
+| Ponocko 100% | 0.061 | 0.041 |
+| Ponocko 0%, trained on an independent CREST population (same model, upper bound) | 0.060 | 0.043 |
+
+**Conclusions.**
+1. Wet appliances: ours (no sub-metering) is between their 5% and 10%, and its CDF lies between theirs (Fig. 6, right).
+2. Controllable: ours is slightly better than their 5% but well behind 10%; the remaining error is the parts ours does
+   not estimate in CREST (cold appliances, water heaters), visible as the offset of our CDF (Fig. 6, left).
+3. Their 100% has one bad test day (0.415): a single training run can fail; the paper shows one day only.
+4. Fig. 7 (day 40): with 5% their composition is visually close, as in their paper, but misplaces RC/SMPS in the
+   evening; our wet estimate follows the actual wet load closely.
+
+## T8 - Final method (v0.8) on real data, real vs estimated [v0.8]
+
+`experiments/t8_real_figures.py`, `t8_plot.py`; figures `experiments/results/figures/t8_fig_cdf.png`,
+`t8_fig_days.png`; tables `experiments/results/t8_real.md`. Development data; groups = all development homes present
+together (REFIT 13, Pecan Austin 16, Pecan New York 15). UK-DALE homes never overlap in time, so each is evaluated alone.
+Truth: weather-dependent = AC / furnace / heaters (as in T4); shiftable = wet appliances + electric storage water
+heaters. AWFE hourly, p.u. of the 30-day mean load of the group.
+
+| Group | Part | Ours AWFE p90 | Zero AWFE p90 | Energy est./true |
+|---|---|---|---|---|
+| Pecan Austin (16) | flexible | **0.30** | 1.00 | 0.73 |
+| | shiftable | 0.095 | 0.129 | 0.72 |
+| | weather-dependent | 0.285 | 0.96 | 0.73 |
+| Pecan New York (15) | flexible | **0.32** | 0.53 | 0.51 |
+| | shiftable | 0.22 | 0.32 | 0.32 |
+| | weather-dependent | 0.18 | 0.32 | 0.71 |
+| REFIT (13) | flexible | **0.24** | 0.32 | 0.92 |
+| | weather-dependent | 0.02 | 0.02 | 0 (gate: no weather load) |
+| UK-DALE B1 (single home, 3.4 years) | flexible | 0.16 | 0.20 | 0.91 |
+| UK-DALE B2, B5 (single homes, 73 / 99 days) | flexible | 0.19 / 0.22 | 0.02 / 0.08 | 0.81 / 0.93 |
+
+**Ponocko-style ANN on the same groups, adapted to the data available** (hourly P only - no Q, no 1-minute data;
+trained on the 7 days before each weekly test day; median of 3 draws; numbers only, not in the figures). AWFE p90 of
+the flexible load, theirs vs ours on the same test days:
+
+| Group | 1 sub-metered home | 20% | 50% | Ours (0%) |
+|---|---|---|---|---|
+| Pecan Austin | 0.40 | 0.24 | 0.18 | 0.31 |
+| Pecan New York | 0.55 | 0.47 | 0.23 | 0.29 |
+| REFIT | 0.44 | 0.29 | 0.21 | 0.23 |
+
+**Conclusions.**
+1. On real substations-in-miniature (13-16 homes) ours beats the zero estimate on every part, most where weather
+   matters (Austin flexible 0.30 vs 1.00), and follows the daily shape (figures). It underestimates the level where
+   load is weather-driven: Austin AC (0.73) and New York (0.51, the always-on water heater P950 of T3 v3).
+2. Against the adapted Ponocko ANN, ours is better than 1 home and 20% sub-metered in all three groups and close to
+   50% in REFIT; their 50% is better in Austin (AC) and New York. This version of their method lacks Q and 1-minute
+   data, which they rely on, so it is a lower bound for their method, not a reproduction.
+3. Single homes (UK-DALE): with a long record (B1) ours beats zero; with 2-3 months (B2, B5) false events dominate the
+   90th percentile and zero is better. The method is meant for aggregates and needs history; this is the expected
+   failure mode, reported, not hidden.
