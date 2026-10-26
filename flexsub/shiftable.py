@@ -1,4 +1,4 @@
-"""Shiftable appliance load (washing machine, tumble dryer, dishwasher) without sub-metering in the target network.
+"""Shiftable appliance load (washing machine, tumble dryer, dishwasher, resistive water heater; used by M3) without sub-metering in the target network.
 
 Two alternatives are kept side by side until one is chosen (see experiments/RESULTS.md, T3 v2):
 

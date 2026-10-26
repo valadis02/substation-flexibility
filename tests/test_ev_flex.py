@@ -35,3 +35,22 @@ def test_stagger_lowers_rebound_peak():
     _, stag = ev_flex.plan(_T(), (18, 21), "down", base_kw=base, stagger=True)
     assert stag.total_after_kw.values[21:].max() < simple.total_after_kw.values[21:].max()
     assert np.isclose(stag.after_kw.sum(), stag.before_kw.sum())
+
+
+def test_m5_envelope_includes_ev_and_m6_scales_it():
+    """v0.10: EV sessions enter the M5 envelope; participation (M6) scales every column, EV included."""
+    from flexsub import Config, flexibility
+    cfg = Config(tz="UTC")
+    idx = pd.date_range("2024-01-01", periods=24 * 10, freq="h", tz="UTC")
+    D = pd.DataFrame({"actual": 2.0, "base": 0.5, "thermal": 0.5, "ev": 0.0, "shiftable": 0.5, "routine": 0.5}, index=idx)
+    ev_on = (idx.hour >= 19) & (idx.hour < 21)
+    D.loc[ev_on, "ev"] = 7.0; D.loc[ev_on, "actual"] += 7.0
+    S = pd.DataFrame({"start": idx[(idx.hour == 19)], "hours": 2, "energy_kwh": 14.0, "power_kw": 7.0})
+    D.attrs["ev_sessions"] = {"H1": S}
+    F = flexibility.flexibility_by_hour(D, cfg)
+    assert abs(F.loc[19, "down_ev_kw"] - 7.0) < 1e-9 and F.loc[20, "down_ev_kw"] > 6.9   # charging with room later
+    assert F.loc[22, "up_ev_kw"] > 0 and F.loc[15, "up_ev_kw"] == 0                      # plugged after, not before
+    assert np.allclose(F.down_kw, F.down_ev_kw + 1.0)                                      # 0.5 thermal + 0.5 appliances
+    G = flexibility.apply_participation(F, 0.25)
+    for c in ("down_kw", "down_ev_kw", "up_ev_kw", "up_kw"):
+        assert np.allclose(G[c], 0.25 * F[c])

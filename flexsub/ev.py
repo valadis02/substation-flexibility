@@ -1,7 +1,9 @@
-"""M6 (v0.9): EV charging - detection, sessions, plug-in windows and actionable day-ahead flexibility.
+"""M4 (v0.10): EV charging - detection, sessions, plug-in windows, EV envelope and a day-ahead plan used for validation.
 
-Separate from M3/M4: total flexibility of a substation = M4 (weather-dependent + appliances) + M6 (EV).
-M3 uses `ev_home` only to keep charging hours out of the appliance events and the routine part.
+v0.10: EV is one flexible category like weather and appliances. M4 estimates it (`ev_home`, used inside the M3
+decomposition, and `sessions`), M5
+turns its sessions into kW down / up per hour (`envelope`, via flexsub.flexibility.ev_mean_day) in the same envelope
+as weather and appliances, and M6 applies participation to all of it. (v0.9 had EV as a separate module M6.)
 
 0. `ev_home`: EV charging per home from its hourly load (below).
 1. `sessions`: each run of EV hours is a charging session: start, number of hours, energy (kWh), charger power

@@ -3,7 +3,7 @@ Parts sum to the actual load.
 
 Per home (smart-meter data of that home only):
   base       always-on level: low quantile of the home's load in its own lowest-load hours of the day
-  ev         EV charging (M6, `ev.ev_home`, v0.9): long high-power runs, after removing the home's weather load
+  ev         EV charging (M4, `ev.ev_home`): long high-power runs, after removing the home's weather load
   shiftable  discrete appliance events found from the data only (`shiftable.events_home`, T3 v2 design A), after
              removing the home's weather-dependent load (M2 fitted on the home); EV hours excluded
 Substation:
@@ -40,7 +40,8 @@ def house_parts(s, w, cfg):
     ev, ev_mask = m6.ev_home(s, k=cfg.ev_k, gate=cfg.ev_gate, max_cv=cfg.ev_max_cv, weather_load=wl)
     sh = shiftable.events_home(s, weather_load=wl).where(~ev_mask, 0.0)       # an EV hour is not also an appliance event
     ok = s.notna() & sh.notna() & ev.notna()
-    return pd.DataFrame({"actual": s, "base": np.minimum(base, s), "ev": ev.fillna(0.0), "shiftable": sh.fillna(0.0), "ok": ok})
+    return pd.DataFrame({"actual": s, "base": np.minimum(base, s), "ev": ev.fillna(0.0), "shiftable": sh.fillna(0.0), "ok": ok,
+                         "ev_mask": ev_mask.fillna(False).astype(bool)})
 
 
 def decompose_substation(W, w, thermal, cfg):
@@ -59,4 +60,6 @@ def decompose_substation(W, w, thermal, cfg):
         rem = rem - a
     out["routine"] = rem
     out["actual"] = S["actual"]
+    # EV sessions per home, for the EV part of the envelope (M5, flexsub.flexibility)
+    out.attrs["ev_sessions"] = {h: m6.sessions(p["ev"], p["ev_mask"], cfg.tz) for h, p in zip(W.columns, parts) if p["ev_mask"].any()}
     return out

@@ -13,17 +13,17 @@ The method should adapt to each substation with as few hand-set numbers as possi
 estimated only from the same substation's past data (never future data, never ground truth). Whatever stays fixed
 is checked in T4: if results are insensitive we say so; if not, it has to become data-driven.
 
-| Parameter | Now | How it becomes data-driven | Test |
+| Parameter | At the start (v0.1) | How it became / becomes data-driven (v0.10 status) | Test |
 |---|---|---|---|
-| Neutral temperature, CDD/HDD bases | 20 / 24 / 16 C | heating and cooling balance points estimated from the substation's own load vs temperature | T2 |
-| Meal hours | 12-15, 18-22 | the substation's own daily profile, or HETUS by country | T3 |
-| Event threshold | 0.4 kW | relative to the substation's load distribution (0.4 kW means nothing at 500 homes) | T3 |
-| Base-load hours | 02-06 | hours of minimum load in the data | T3 |
-| Shift window | +-3 h | tolerance of delay from time-use and wet-appliance pilot studies | T3/T4 |
-| Power cap | 90th percentile | stays a parameter; T4 checks the sensitivity | T4 |
+| Neutral temperature, CDD/HDD bases | 20 / 24 / 16 C | done: heating and cooling balance points from the substation's own load vs temperature (v0.4-v0.6) | T2 |
+| Meal hours | 12-15, 18-22 | done: removed (v0.7); appliance events no longer use meal hours | T3 |
+| Event threshold | 0.4 kW | done: 3 robust SD of each home's own excess over its same-hour 60th percentile (v0.7-v0.8); EV: 2.5 kW, physical (charger power) | T3, T9 |
+| Base-load hours | 02-06 | done: each home's 4 quietest hours (v0.7) | T3 |
+| Shift window | +-3 h | product definition (S = 3); envelope accuracy insensitive (T4) | T4 |
+| Power cap | 90th percentile | product definition; accuracy insensitive (T4) | T4 |
 | Calibration window | 14 days | Adaptive Conformal Inference adjusts it online | T1 (open) |
 | Target coverage | 0.90 | user choice (a DSO may want 0.95); not a method parameter | - |
-| Enrolment, response rate | 1.0 / scenarios | DSO input (enrolment); estimated from past events (response) | T6 |
+| Enrolment, response rate | 0.3 | 1.0 (technical maximum) + scenarios; DSO input (enrolment); estimated from past events (response); applies to EV too since v0.10 | T6 |
 
 ---
 
@@ -817,3 +817,50 @@ Rejected.
 
 **Conclusion.** None of the four changes improves the hourly error without breaking another dataset. The remaining
 under-estimation is mostly HVAC load that runs regardless of weather, missed EVs in New York, and level-1 charging.
+
+## T12 - One envelope with EV inside; participation for all [v0.10]
+
+**Question.** In v0.9 the envelope (M4) covered weather + appliances, EV was a separate module (M6) and participation
+(M5) scaled M4 only, so "M4 + M6" added a scaled and an unscaled part. Does one envelope for all flexible load, with
+participation applied to all of it, describe the true flexibility better?
+
+**v0.10.** M4 = EV estimate (`flexsub/ev.py`); M5 = one envelope: weather + appliances by the short-cycle rule
+(unchanged), EV from its sessions (every session of the period, weight 1/days, plugged max(10 h, its length) from the
+start; down = charging with room later in the window, up = plugged cars not charging that still have energy to
+deliver; `flexibility.ev_mean_day`); M6 = participation on every column, EV included. The decomposition is unchanged.
+
+**Test** (`experiments/t12_envelope_ev.py`, T9 cache, development data, groups including EV homes: Austin 20 homes / 4 EV,
+New York 17 / 3, REFIT 13, Plegma 3). Estimated envelope vs the same rule applied to the true decomposition (same base;
+weather = AC/heating circuits, EV = car circuits, appliances = sub-metered appliances; true sessions = car circuit
+> 0.3 kW). err = mean |est - true| over 24 h / mean load; ratio = est / true over the day. Full table:
+`experiments/results/t12_envelope_ev.md`.
+
+| Dataset | Variant | Down est./true | Down err | Up est./true | Up err |
+|---|---|---|---|---|---|
+| Austin | v0.9 M4 (no EV in envelope) | 0.79 | 0.106 | 0.86 | 0.085 |
+| Austin | **v0.10, EV by sessions** | **0.84** | **0.082** | **0.98** | **0.027** |
+| Austin | v0.10, EV by short-cycle rule | 0.84 | 0.081 | 1.02 | 0.023 |
+| New York | v0.9 M4 (no EV in envelope) | 0.79 | 0.055 | 0.87 | 0.049 |
+| New York | **v0.10, EV by sessions** | **0.82** | **0.050** | **0.98** | **0.040** |
+| New York | v0.10, EV by short-cycle rule | 0.79 | 0.056 | 1.24 | 0.051 |
+| REFIT / Plegma | all (no EV) | 0.93 / 0.95 | 0.035 / 0.043 | 1.18 / 1.03 | 0.060 / 0.092 |
+
+EV part alone (sessions): Austin down 0.81, up 0.73; New York down 0.27, up 0.32 (2 of 3 cars not found).
+
+Participation 0.1 (enrolment 0.2 x response 0.5), est. / (0.1 x true): v0.9 (0.1 x M4 + unscaled EV) Austin down 1.25,
+up 2.00, New York 1.10 / 1.98; v0.10 Austin 0.84 / 0.98, New York 0.82 / 0.98. Without EV nothing changes.
+
+Hourly flexible load (weather + appliances + EV) is unchanged, as expected: AWFE p90 0.293 / 0.248 / 0.242 / 0.311,
+energy est./true 0.75 / 0.79 / 0.92 / 0.94.
+
+**Conclusions.**
+1. The estimation itself did not change; what changed is that the envelope now contains the EV flexibility, so the
+   number the DSO reads covers all flexible load: in the substations with EVs the error of the envelope against the
+   true one drops (Austin up 0.085 -> 0.027), and the under-estimation of down shrinks (0.79 -> 0.84 Austin).
+2. Participation is now consistent. In v0.9, at low participation the total over-stated the up flexibility about twice
+   in Austin and New York, because the EV part was not scaled.
+3. EV by its sessions rather than by the short-cycle rule: equal on down, and the short-cycle rule over-states up in
+   New York (1.24) and ignores whether the car is at home (it takes energy within +-3 h of the block). Sessions rule
+   adopted.
+4. Limits unchanged: the EV up flexibility and its truth both rest on the 10 h plug-in assumption (not observable in
+   hourly data); New York still misses 2 of 3 EVs.

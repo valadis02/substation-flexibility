@@ -1,4 +1,4 @@
-# T8: final method (v0.8) on real data, development period
+# T8: method v0.9 (rerun, P950 excluded) on real data, development period
 
 AWFE in p.u. of the 30-day mean load (UK-DALE: median over single homes).
 

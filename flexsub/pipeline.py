@@ -9,7 +9,9 @@ def run(W, weather, cfg, test_days, participation=None, response=1.0):
     response: share of enrolled homes that respond to an event; the effective factor is participation x response.
     If participation is None, the technical maximum (cfg.participation = 1.0) is returned together with the
     scenarios in cfg.participation_scenarios, keyed by (enrolment, response).
-    Returns dict with baseline band (M1), thermal part (M2), decomposition (M3) and flexibility per hour (M4)."""
+    Returns dict with baseline band (M1), weather-dependent part (M2), decomposition (M3: base, weather, EV,
+    appliances, routine; EV from M4), one flexibility envelope per hour for all flexible categories incl. EV (M5) and the
+    envelope times participation (M6)."""
     W = W.copy(); W.index = W.index.tz_convert(cfg.tz)
     weather = weather.copy(); weather.index = weather.index.tz_convert(cfg.tz)
     y = W.sum(axis=1)
@@ -24,10 +26,11 @@ def run(W, weather, cfg, test_days, participation=None, response=1.0):
 
 
 def ev_day_ahead(W, weather, cfg, day, mode="dwell"):
-    """M6: actionable EV flexibility for `day` (local date), from data before it only. Returns dict(sessions per EV
+    """Day-ahead EV view for `day` (local date), from data before it only (validation tool, T9d; the method's EV
+    flexibility is the EV part of the M5 envelope). Returns dict(sessions per EV
     home, scenarios, envelope per hour from local midnight (0..35), base_kw = expected non-EV substation load (same-hour
     mean of the last 14 days, for valley filling), and plan(hours, direction, target_kw=None) -> (per-home
-    instructions, aggregate before/after per hour)). Total flexibility of the day = M4 + this envelope."""
+    instructions, aggregate before/after per hour))."""
     W = W.copy(); W.index = W.index.tz_convert(cfg.tz)
     weather = weather.copy(); weather.index = weather.index.tz_convert(cfg.tz)
     d0 = pd.Timestamp(day).tz_localize(cfg.tz) if pd.Timestamp(day).tzinfo is None else pd.Timestamp(day)

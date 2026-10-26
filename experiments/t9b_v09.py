@@ -14,6 +14,8 @@ T9c - is the EV flexibility actionable the day before? For each development day 
       Plug-in window dwell_h = 6 / 10 / 14 h.
 
     python experiments/t9b_v09.py
+(v0.10: updated to the current flexsub.ev API - the plug-in window is set in typical_day; the plan without valley
+filling, as in the original T9c run.)
 """
 import os, pickle
 from dataclasses import replace
@@ -70,19 +72,19 @@ for ds, D in C.items():
     days = pd.Index(TE.index.normalize().unique())
     for dwell in (6, 10, 14):
         for i, d0 in enumerate(days[14:-1], start=14):
-            T = ev_flex.typical_day(S, d0)
+            T = ev_flex.typical_day(S, d0, dwell_h=dwell)          # the plug-in window is set on the scenarios
             if len(T) == 0:
                 continue
             idx = pd.date_range(d0, periods=36, freq="h")
             day_true = TE.reindex(idx).fillna(0)
             if TE.reindex(idx).notna().sum().sum() < 24:
                 continue
-            env = ev_flex.envelope(T, dwell_h=dwell)
+            env = ev_flex.envelope(T)
             if dwell == 10:
                 prof_rows.append(dict(dataset=ds, day=d0, est=env.ev_kw.values[:24], true=day_true.sum(axis=1).values[:24]))
             pk = max(0, int(pd.Series(env.ev_kw.values[:24]).rolling(3).sum().idxmax()) - 2)   # start of the 3 busiest hours
             for kind, blk in (("reduce", (pk, pk + 3)), ("increase", (25, 28))):
-                P, A = ev_flex.plan(T, blk, "down" if kind == "reduce" else "up", dwell_h=dwell)
+                P, A = ev_flex.plan(T, blk, "down" if kind == "reduce" else "up", stagger=False)
                 if len(P) == 0:
                     crow.append(dict(dataset=ds, dwell_h=dwell, request=kind, day=d0, homes=0, predicted_kw=0.0, real_kw=0.0)); continue
                 b0, b1 = blk

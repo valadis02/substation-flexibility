@@ -48,7 +48,7 @@ Status: *read* = full text read; *abstract* = only abstract/summary seen; *to re
 
 ## 5. Behaviour and time use (when people cook, wash, charge; who responds)
 
-- [38] Harmonised European Time Use Survey (HETUS), Eurostat. Activity timing by country; source for meal and appliance-use hours (M3/M4). Greek coverage and microdata access to check. *to read*
+- [38] Harmonised European Time Use Survey (HETUS), Eurostat. Activity timing by country; source for meal and appliance-use hours (meal hours were dropped in v0.7; kept for reference). Greek coverage and microdata access to check. *to read*
 - **[39] El Makroum R., Zwickl-Bernhard S., Kranzl L., Auer H., "Load scheduling optimization for user-centric residential demand response leveraging time use surveys", Applied Energy 403, 2026.** Uses HETUS to model when laundry, dishwashing, cooking happen; trade-off cost vs disruption. *abstract*
 - [40] Satre-Meloy A., Diakonova M., Grünewald P., "Daily life and demand: an analysis of intra-day variations in residential electricity consumption with time-use data", Energy Efficiency 13, 2020. 173 UK homes; food, chores and recreation most linked to demand. *summary*
 - [41] Torriti J., "Peak demand, price elasticity and intrinsic flexibility from time use activities" (University of Reading). *to read*
@@ -58,11 +58,11 @@ Status: *read* = full text read; *abstract* = only abstract/summary seen; *to re
 - [45] Dupont B. et al., "LINEAR breakthrough project: large-scale implementation of smart grid technologies in distribution grids" (Belgium; smart wet appliances, ~2012–2013). Setup only; results in follow-up papers. *read (setup)*
 - [46] Electric Nation (UK smart EV charging trial, Western Power Distribution / National Grid). Plug-in times and smart-charging response. *to read*
 - [24] ESRI study on household appliance use in the evening peak, Ireland, Heliyon 7, e07559, 2021.
-- [25] Octopus Energy, "Saving Sessions", BIEE 2023. Participation/response in a real DR scheme (input for M5).
-- [26] Carbon Brief, "Q&A: How Great Britain's demand flexibility service is cutting costs and CO2 emissions", 2023. (M5)
-- [27] University of Michigan CSS, "Quantifying the impact of participant override behavior in summer demand response". (M5)
-- [28] CPUC, smart thermostat demand response evaluation presentation. (M5)
-- [29] Nambiar et al., "Residential demand response case studies", UC Berkeley CBE, 2024. (M5)
+- [25] Octopus Energy, "Saving Sessions", BIEE 2023. Participation/response in a real DR scheme (input for M6, participation).
+- [26] Carbon Brief, "Q&A: How Great Britain's demand flexibility service is cutting costs and CO2 emissions", 2023. (M6)
+- [27] University of Michigan CSS, "Quantifying the impact of participant override behavior in summer demand response". (M6)
+- [28] CPUC, smart thermostat demand response evaluation presentation. (M6)
+- [29] Nambiar et al., "Residential demand response case studies", UC Berkeley CBE, 2024. (M6)
 - [22] Odyssee-Mure, "Unit consumption of air conditioning". (M2 plausibility)
 - [23] University of Otago, "Estimating the technical potential for residential demand response in New Zealand".
 
@@ -75,4 +75,4 @@ Status: *read* = full text read; *abstract* = only abstract/summary seen; *to re
 - [51] UK Power Networks / Low Carbon London, "LCL Project Closedown Report", Ofgem 2015: ~4,600 London secondary substations = 25% of stock (-> ~18,000); >10% of London substations have <10 customers; GB primary substations typically serve 10–11,000 customers; dToU households responded on average c. 50 W (56 W winter, 34 W summer), best responders ~3x.
 - [52] Low Carbon London smart-meter data, London Datastore: 5,567 households, half-hourly, Nov 2011–Feb 2014; ~1,100 on dynamic ToU in 2013 (day-ahead High/Low/Normal price signals, Tariffs.xlsx); CC BY 4.0.
 
-Open gap: no source yet with measured enrolment/response rates to set the participation share (M5, default 0.3).
+Open gap: no source yet with measured enrolment/response rates to set the participation share (M6; default 1.0 = technical maximum, scenarios enrolment x response).

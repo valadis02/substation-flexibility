@@ -22,18 +22,18 @@ class Config:
     base_hours: int = 4                      # number of the home's own lowest-load hours used for the base level
     base_quantile: float = 0.1
     base_roll_days: int = 7
-    # M6 EV charging (v0.9, flexsub.ev): excess over the same-hour reference > ev_k kW, any run length; home gate ev_gate
+    # M4 EV charging (flexsub.ev; enveloped in M5): excess over the same-hour reference > ev_k kW, any run length; home gate ev_gate
     ev_k: float = 2.5
     ev_gate: float = 0.02
     ev_max_cv: float = 0.14          # flat charging power (T9b)
-    ev_dwell_h: int = 10             # plug-in window from session start (behavioural assumption, T9c)
+    ev_dwell_h: int = 10             # plug-in window from session start (behavioural assumption, T9c); used by the M5 EV envelope
     ev_history_days: int = 14        # sessions used as day-ahead scenarios
-    # M4 flexibility
+    # M5 flexibility envelope (weather + appliances; EV uses its sessions, see flexsub.flexibility)
     shift_window_h: int = 3         # energy can be moved from +-this many hours
     request_duration_h: int = 2     # length of the upward request block
     cap_quantile: float = 0.9       # power cap: observed extra draw of shiftable load at that hour
-    # M5 participation
-    # M5 scenarios. The headline result is the technical maximum (every home, every event). Scenarios scale it by
+    # M6 participation (applies to every flexible category, EV included)
+    # M6 scenarios. The headline result is the technical maximum (every home, every event). Scenarios scale it by
     # enrolment x response rate (share of enrolled homes that actually respond to an event). Scenarios are only for
     # illustration (how it would look for a DSO) and comparison with realised responses in the literature.
     participation: float = 1.0      # technical maximum
