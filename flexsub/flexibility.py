@@ -3,7 +3,8 @@
 M2 (weather), M3 (appliances, in the decomposition) and M4 (EV, flexsub.ev) estimate the flexible categories.
 M5 turns each category into kW down and kW up per hour of an average day:
   weather + appliances (short cycles): Down(h) = mean flexible load at h; Up(h) = min(E, C), with E the flexible
-      energy of the S hours before and after a d-hour block starting at h, and C the q90 extra draw seen at h.
+      energy of the S hours before and after a d-hour block starting at h, and C the q90 extra draw seen at h and
+      its two neighbouring hours (pooled, v0.11: T14).
   EV (sessions with a plug-in window, flexsub.ev): every session of the period is a scenario of weight 1/days, at its
       own clock hour, plugged for max(dwell_h, its length) hours; Down = charging that has room later in its window,
       Up = plugged cars not charging at that hour that still have energy to deliver (flexsub.ev.envelope, folded
@@ -24,7 +25,15 @@ def _short_cycle(D, cols, cfg):
     sh = f.groupby(h).mean().reindex(range(24)).fillna(0).values
     S, dur = cfg.shift_window_h, cfg.request_duration_h
     up_e = np.array([sum(sh[(x + k) % 24] for k in list(range(-S, 0)) + list(range(dur, dur + S))) / dur for x in range(24)])
-    cap = (f.groupby(h).quantile(cfg.cap_quantile) - f.groupby(h).mean()).clip(lower=0).reindex(range(24)).fillna(0).values
+    # cap per hour: extra draw (q - mean) of the flexible load, pooled over the hour and its two neighbours, so that one
+    # day more or less in the window does not move it much (v0.11; per-hour q90 from ~35 values was noisy)
+    hv = np.asarray(h)
+    cap = np.zeros(24)
+    for x in range(24):
+        v = f.values[np.isin(hv, [(x - 1) % 24, x, (x + 1) % 24])]
+        v = v[~np.isnan(v)]
+        if len(v):
+            cap[x] = max(np.quantile(v, cfg.cap_quantile) - v.mean(), 0.0)
     return sh, up_e, cap
 
 
