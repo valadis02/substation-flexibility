@@ -1,0 +1,537 @@
+{
+ "source": "IEEE European LV test feeder, NEPLAN CIM export (dpsim-simulator/cim-grid-data)",
+ "lines": {
+  "L101": {
+   "r_ohm_km": 0.164,
+   "cls": "main"
+  },
+  "L127": {
+   "r_ohm_km": 0.772,
+   "cls": "branch"
+  },
+  "L126": {
+   "r_ohm_km": 0.772,
+   "cls": "branch"
+  },
+  "L36": {
+   "r_ohm_km": 0.7719,
+   "cls": "branch"
+  },
+  "L33": {
+   "r_ohm_km": 0.772,
+   "cls": "branch"
+  },
+  "L28": {
+   "r_ohm_km": 0.772,
+   "cls": "branch"
+  },
+  "L5": {
+   "r_ohm_km": 0.164,
+   "cls": "main"
+  },
+  "L105": {
+   "r_ohm_km": 0.772,
+   "cls": "branch"
+  },
+  "L104": {
+   "r_ohm_km": 0.7719,
+   "cls": "branch"
+  },
+  "L102": {
+   "r_ohm_km": 0.772,
+   "cls": "branch"
+  },
+  "L32": {
+   "r_ohm_km": 0.164,
+   "cls": "main"
+  },
+  "L37": {
+   "r_ohm_km": 0.772,
+   "cls": "branch"
+  },
+  "L108": {
+   "r_ohm_km": 0.164,
+   "cls": "main"
+  },
+  "L109": {
+   "r_ohm_km": 0.1638,
+   "cls": "main"
+  },
+  "L107": {
+   "r_ohm_km": 0.164,
+   "cls": "main"
+  },
+  "L106": {
+   "r_ohm_km": 0.772,
+   "cls": "branch"
+  },
+  "L42": {
+   "r_ohm_km": 0.772,
+   "cls": "branch"
+  },
+  "L40": {
+   "r_ohm_km": 0.772,
+   "cls": "branch"
+  },
+  "L39": {
+   "r_ohm_km": 0.164,
+   "cls": "main"
+  },
+  "L38": {
+   "r_ohm_km": 0.772,
+   "cls": "branch"
+  },
+  "L10": {
+   "r_ohm_km": 0.772,
+   "cls": "branch"
+  },
+  "L11": {
+   "r_ohm_km": 0.772,
+   "cls": "branch"
+  },
+  "L133": {
+   "r_ohm_km": 0.772,
+   "cls": "branch"
+  },
+  "L132": {
+   "r_ohm_km": 0.772,
+   "cls": "branch"
+  },
+  "L111": {
+   "r_ohm_km": 0.772,
+   "cls": "branch"
+  },
+  "L68": {
+   "r_ohm_km": 0.164,
+   "cls": "main"
+  },
+  "L69": {
+   "r_ohm_km": 0.7719,
+   "cls": "branch"
+  },
+  "L57": {
+   "r_ohm_km": 0.164,
+   "cls": "main"
+  },
+  "L47": {
+   "r_ohm_km": 0.1641,
+   "cls": "main"
+  },
+  "L46": {
+   "r_ohm_km": 0.772,
+   "cls": "branch"
+  },
+  "L43": {
+   "r_ohm_km": 0.1639,
+   "cls": "main"
+  },
+  "L41": {
+   "r_ohm_km": 0.1642,
+   "cls": "main"
+  },
+  "L9": {
+   "r_ohm_km": 0.164,
+   "cls": "main"
+  },
+  "L8": {
+   "r_ohm_km": 0.7721,
+   "cls": "branch"
+  },
+  "L114": {
+   "r_ohm_km": 0.7719,
+   "cls": "branch"
+  },
+  "L113": {
+   "r_ohm_km": 0.772,
+   "cls": "branch"
+  },
+  "L110": {
+   "r_ohm_km": 0.164,
+   "cls": "main"
+  },
+  "L74": {
+   "r_ohm_km": 0.772,
+   "cls": "branch"
+  },
+  "L73": {
+   "r_ohm_km": 0.772,
+   "cls": "branch"
+  },
+  "L70": {
+   "r_ohm_km": 0.164,
+   "cls": "main"
+  },
+  "L71": {
+   "r_ohm_km": 0.1642,
+   "cls": "main"
+  },
+  "L59": {
+   "r_ohm_km": 0.7719,
+   "cls": "branch"
+  },
+  "L52": {
+   "r_ohm_km": 0.7719,
+   "cls": "branch"
+  },
+  "L48": {
+   "r_ohm_km": 0.164,
+   "cls": "main"
+  },
+  "L13": {
+   "r_ohm_km": 0.164,
+   "cls": "main"
+  },
+  "L117": {
+   "r_ohm_km": 0.772,
+   "cls": "branch"
+  },
+  "L112": {
+   "r_ohm_km": 0.164,
+   "cls": "main"
+  },
+  "L115": {
+   "r_ohm_km": 0.7721,
+   "cls": "branch"
+  },
+  "L79": {
+   "r_ohm_km": 0.772,
+   "cls": "branch"
+  },
+  "L72": {
+   "r_ohm_km": 0.164,
+   "cls": "main"
+  },
+  "L75": {
+   "r_ohm_km": 0.772,
+   "cls": "branch"
+  },
+  "L54": {
+   "r_ohm_km": 0.772,
+   "cls": "branch"
+  },
+  "L53": {
+   "r_ohm_km": 0.164,
+   "cls": "main"
+  },
+  "L58": {
+   "r_ohm_km": 0.772,
+   "cls": "branch"
+  },
+  "L15": {
+   "r_ohm_km": 0.1643,
+   "cls": "main"
+  },
+  "L12": {
+   "r_ohm_km": 0.164,
+   "cls": "main"
+  },
+  "L116": {
+   "r_ohm_km": 0.164,
+   "cls": "main"
+  },
+  "L119": {
+   "r_ohm_km": 0.772,
+   "cls": "branch"
+  },
+  "L118": {
+   "r_ohm_km": 0.7721,
+   "cls": "branch"
+  },
+  "L78": {
+   "r_ohm_km": 0.164,
+   "cls": "main"
+  },
+  "L83": {
+   "r_ohm_km": 0.7721,
+   "cls": "branch"
+  },
+  "L82": {
+   "r_ohm_km": 0.772,
+   "cls": "branch"
+  },
+  "L56": {
+   "r_ohm_km": 0.772,
+   "cls": "branch"
+  },
+  "L55": {
+   "r_ohm_km": 0.1639,
+   "cls": "main"
+  },
+  "L17": {
+   "r_ohm_km": 0.772,
+   "cls": "branch"
+  },
+  "L14": {
+   "r_ohm_km": 0.1639,
+   "cls": "main"
+  },
+  "L123": {
+   "r_ohm_km": 0.164,
+   "cls": "main"
+  },
+  "L130": {
+   "r_ohm_km": 0.772,
+   "cls": "branch"
+  },
+  "L131": {
+   "r_ohm_km": 0.7721,
+   "cls": "branch"
+  },
+  "L122": {
+   "r_ohm_km": 0.772,
+   "cls": "branch"
+  },
+  "L99": {
+   "r_ohm_km": 0.772,
+   "cls": "branch"
+  },
+  "L98": {
+   "r_ohm_km": 0.772,
+   "cls": "branch"
+  },
+  "L85": {
+   "r_ohm_km": 0.772,
+   "cls": "branch"
+  },
+  "L128": {
+   "r_ohm_km": 0.772,
+   "cls": "branch"
+  },
+  "L129": {
+   "r_ohm_km": 0.772,
+   "cls": "branch"
+  },
+  "L124": {
+   "r_ohm_km": 0.772,
+   "cls": "branch"
+  },
+  "L86": {
+   "r_ohm_km": 0.164,
+   "cls": "main"
+  },
+  "L87": {
+   "r_ohm_km": 0.164,
+   "cls": "main"
+  },
+  "L84": {
+   "r_ohm_km": 0.1642,
+   "cls": "main"
+  },
+  "L19": {
+   "r_ohm_km": 0.164,
+   "cls": "main"
+  },
+  "L103": {
+   "r_ohm_km": 0.164,
+   "cls": "main"
+  },
+  "L125": {
+   "r_ohm_km": 0.164,
+   "cls": "main"
+  },
+  "L95": {
+   "r_ohm_km": 0.164,
+   "cls": "main"
+  },
+  "L94": {
+   "r_ohm_km": 0.772,
+   "cls": "branch"
+  },
+  "L92": {
+   "r_ohm_km": 0.164,
+   "cls": "main"
+  },
+  "L93": {
+   "r_ohm_km": 0.772,
+   "cls": "branch"
+  },
+  "L23": {
+   "r_ohm_km": 0.164,
+   "cls": "main"
+  },
+  "L22": {
+   "r_ohm_km": 0.772,
+   "cls": "branch"
+  },
+  "L20": {
+   "r_ohm_km": 0.1637,
+   "cls": "main"
+  },
+  "L16": {
+   "r_ohm_km": 0.164,
+   "cls": "main"
+  },
+  "L63": {
+   "r_ohm_km": 0.772,
+   "cls": "branch"
+  },
+  "L61": {
+   "r_ohm_km": 0.772,
+   "cls": "branch"
+  },
+  "L49": {
+   "r_ohm_km": 0.1641,
+   "cls": "main"
+  },
+  "L27": {
+   "r_ohm_km": 0.772,
+   "cls": "branch"
+  },
+  "L25": {
+   "r_ohm_km": 0.164,
+   "cls": "main"
+  },
+  "L24": {
+   "r_ohm_km": 0.772,
+   "cls": "branch"
+  },
+  "L64": {
+   "r_ohm_km": 0.7719,
+   "cls": "branch"
+  },
+  "L60": {
+   "r_ohm_km": 0.164,
+   "cls": "main"
+  },
+  "L62": {
+   "r_ohm_km": 0.772,
+   "cls": "branch"
+  },
+  "L31": {
+   "r_ohm_km": 0.772,
+   "cls": "branch"
+  },
+  "L26": {
+   "r_ohm_km": 0.164,
+   "cls": "main"
+  },
+  "L45": {
+   "r_ohm_km": 0.772,
+   "cls": "branch"
+  },
+  "L44": {
+   "r_ohm_km": 0.772,
+   "cls": "branch"
+  },
+  "L65": {
+   "r_ohm_km": 0.164,
+   "cls": "main"
+  },
+  "L81": {
+   "r_ohm_km": 0.772,
+   "cls": "branch"
+  },
+  "L80": {
+   "r_ohm_km": 0.772,
+   "cls": "branch"
+  },
+  "L30": {
+   "r_ohm_km": 0.164,
+   "cls": "main"
+  },
+  "L51": {
+   "r_ohm_km": 0.772,
+   "cls": "branch"
+  },
+  "L50": {
+   "r_ohm_km": 0.772,
+   "cls": "branch"
+  },
+  "L76": {
+   "r_ohm_km": 0.7721,
+   "cls": "branch"
+  },
+  "L66": {
+   "r_ohm_km": 0.164,
+   "cls": "main"
+  },
+  "L67": {
+   "r_ohm_km": 0.1638,
+   "cls": "main"
+  },
+  "L34": {
+   "r_ohm_km": 0.1639,
+   "cls": "main"
+  },
+  "L35": {
+   "r_ohm_km": 0.1639,
+   "cls": "main"
+  },
+  "L1": {
+   "r_ohm_km": 0.164,
+   "cls": "main"
+  },
+  "L90": {
+   "r_ohm_km": 0.772,
+   "cls": "branch"
+  },
+  "L89": {
+   "r_ohm_km": 0.164,
+   "cls": "main"
+  },
+  "L88": {
+   "r_ohm_km": 0.772,
+   "cls": "branch"
+  },
+  "L77": {
+   "r_ohm_km": 0.1641,
+   "cls": "main"
+  },
+  "L21": {
+   "r_ohm_km": 0.164,
+   "cls": "main"
+  },
+  "L97": {
+   "r_ohm_km": 0.164,
+   "cls": "main"
+  },
+  "L96": {
+   "r_ohm_km": 0.772,
+   "cls": "branch"
+  },
+  "L91": {
+   "r_ohm_km": 0.164,
+   "cls": "main"
+  },
+  "L3": {
+   "r_ohm_km": 0.1639,
+   "cls": "main"
+  },
+  "L2": {
+   "r_ohm_km": 0.7721,
+   "cls": "branch"
+  },
+  "L120": {
+   "r_ohm_km": 0.7718,
+   "cls": "branch"
+  },
+  "L121": {
+   "r_ohm_km": 0.772,
+   "cls": "branch"
+  },
+  "L100": {
+   "r_ohm_km": 0.772,
+   "cls": "branch"
+  },
+  "L29": {
+   "r_ohm_km": 0.164,
+   "cls": "main"
+  },
+  "L18": {
+   "r_ohm_km": 0.164,
+   "cls": "main"
+  },
+  "L6": {
+   "r_ohm_km": 0.772,
+   "cls": "branch"
+  },
+  "L7": {
+   "r_ohm_km": 0.772,
+   "cls": "branch"
+  },
+  "L4": {
+   "r_ohm_km": 0.7721,
+   "cls": "branch"
+  }
+ }
+}

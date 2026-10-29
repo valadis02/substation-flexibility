@@ -4,7 +4,7 @@ Twin: IEEE European LV test feeder (public CIM) inside TWIN-REV, power flows by 
 Homes: the 25 Pecan Street Austin homes (mounted, never in git); the feeder's 55 customer points are filled with the
 real homes on the studied day plus the same homes on other weeks (scenarios.units), one unit per load point.
 Outputs (InfluxDB, Grafana):  lv_scenario,site,day_type,scenario  vmin_pu, vmax_pu, trafo_loading_pct,
-max_line_current_a, net_load_kw (24 h on 2030-01-01, local hours of the studied day);  lv_hosting,site  max_ev_homes,
+max_line_loading_pct, max_line_current_a, net_load_kw (24 h on 2030-01-01, local hours of the studied day);  lv_hosting,site  max_ev_homes,
 max_pv_homes (out of 55 units), max_pv_scale_all_homes.
 """
 import os, threading, traceback, uuid
@@ -47,9 +47,10 @@ class ScenarioRequest(BaseModel):
     hosting: List[str] = Field(["ev", "pv", "pv_scale"], description="hosting capacity searches: 'ev' = most EV homes "
                                "(peak day), 'pv' = most PV homes (PV day), 'pv_scale' = with PV on every home, the largest "
                                "PV size multiplier (PV day)")
-    v_min_pu: float = 0.90
-    v_max_pu: float = 1.10
+    v_min_pu: float = Field(0.95, description="planning limit: 5 % drop budget for the LV network (EN 50160 band is 0.90)")
+    v_max_pu: float = Field(1.05, description="planning limit (EN 50160 band is 1.10)")
     trafo_max_pct: float = 100.0
+    line_max_pct: float = Field(100.0, description="% of the cable's thermal rating")
     seed: int = 0
     write: bool = True
 
@@ -88,7 +89,8 @@ def _run(jid, req):
         _set(jid, status="loading data")
         S = site()
         url, engine = _twinrev()
-        lim = dict(v_min_pu=req.v_min_pu, v_max_pu=req.v_max_pu, trafo_max_pct=req.trafo_max_pct)
+        lim = dict(v_min_pu=req.v_min_pu, v_max_pu=req.v_max_pu, trafo_max_pct=req.trafo_max_pct,
+                   line_max_pct=req.line_max_pct)
         days = {d: (S["days"][d] if d in S["days"] else pd.Timestamp(d, tz=SC.TZ)) for d in req.days}
         runs = {"n": 0}
 
@@ -109,9 +111,12 @@ def _run(jid, req):
                 results[dname][sc.name] = dict(**info, vmin_pu=round(float(st.vmin_pu.min()), 4),
                                                vmax_pu=round(float(st.vmax_pu.max()), 4),
                                                trafo_loading_max_pct=round(float(st.trafo_loading_pct.max()), 1),
+                                               max_line_loading_pct=round(float(st.max_line_loading_pct.max()), 1),
                                                max_line_current_a=round(float(st.max_line_current_a.max()), 1),
+                                               hours_over_limit=G.binding(st, lim),
                                                violations=G.violations(st, lim))
-                df = st[["vmin_pu", "vmax_pu", "trafo_loading_pct", "max_line_current_a", "net_load_kw"]].copy()
+                df = st[["vmin_pu", "vmax_pu", "trafo_loading_pct", "max_line_loading_pct", "max_line_current_a",
+                         "net_load_kw"]].copy()
                 df.index = pd.date_range(SHOW_DAY, periods=24, freq="1h")
                 lines += to_lines("lv_scenario", df, {"site": req.site, "day_type": dname, "scenario": sc.name})
         hosting = {}
@@ -151,6 +156,7 @@ def _run(jid, req):
         _set(jid, status="done", finished=datetime.now(timezone.utc).isoformat(), power_flows=runs["n"], points_written=n,
              days={k: str(v.date()) for k, v in days.items()}, scenarios=results, hosting_capacity=hosting,
              homes_in_data=len(S["homes"]), units_on_feeder=req.n_units, ev_homes_in_data=len(S["ev_homes"]), pv_homes_in_data=len(S["pv_homes"]),
+             grid=dict(trafo_kva=G.TRAFO_KVA, cable_rating_a=G.CABLE_A, limits=lim),
              note="IEEE European LV test feeder (public), DPsim via TWIN-REV; 55 units = the 25 Austin homes on the day + the same homes on other weeks")
     except Exception as e:
         _set(jid, status="failed", error=f"{type(e).__name__}: {e}", trace=traceback.format_exc()[-2000:])

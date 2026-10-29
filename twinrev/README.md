@@ -7,12 +7,38 @@ grid stays within limits.
 
 | | |
 |---|---|
-| Grid | IEEE European LV test feeder: public, 11/0.4 kV, 800 kVA, 55 customers. In TWIN-REV it is DSO cell 3. |
+| Grid | IEEE European LV test feeder (public CIM, 55 customers) as TWIN-REV DSO cell 3, sized for the Austin homes (see below) |
 | Homes | Pecan Street Austin, 25 homes, hourly. The data stays local and is never committed (Dataport licence). The 55 load points are filled with the 25 real homes on the studied day plus the same homes on other weeks (same weekday). Every unit is therefore a real metered home-day. |
 | Days | `peak` = the day with the highest substation net load. `pv` = the day with the lowest (most reverse flow). Specific dates can also be given. |
 | Scenarios (default) | `today` (as in the data), `ev_x2` (2x the EV share), `ev_all` (EV in every home), `pv_x2` (2x the PV share), `ev_x2_pv_x2`. |
-| Hosting capacity | Bisection over DPsim runs: the most EV homes (peak day), the most PV homes (PV day), and, with PV on every home, the largest PV size multiplier (PV day). |
-| Limits | V min 0.90 pu and V max 1.10 pu of 400 V (EN 50160), transformer 100 % of 800 kVA. All three can be changed per request. Line current is reported in A only, because the CIM file has no line ratings. |
+| Hosting capacity | Bisection over DPsim runs: the most EV homes (peak day), the most PV homes (PV day), and, with PV on every home, the largest PV size multiplier (PV day). Empty if a limit is already broken today. |
+| Limits (planning) | V 0.95 to 1.05 pu of 400 V (a 5 % budget for the LV network inside the EN 50160 band of 0.90 to 1.10), transformer 100 %, every cable 100 % of its thermal rating. All can be changed per request (`v_min_pu`, `v_max_pu`, `trafo_max_pct`, `line_max_pct`). Each result gives the hours over each limit (`hours_over_limit`), i.e. the hours that need flexibility. |
+
+### The grid: published feeder, sized for Austin homes
+The published test case is a UK feeder sized for UK homes. Austin homes peak at about twice that load (air conditioning,
+about 3.2 kW per home at the substation peak). With the published cables, the cable at the substation is already over
+its rating on the peak day of 2018, and the voltage falls below 0.95 pu, with no new EVs. `cim/make_lv_zip.py` therefore
+sizes the feeder the way a DSO would for these homes, **with no headroom left**: the network is at the edge of its
+capacity today, so added EVs push it over the limits and flexibility is needed.
+
+| | Published | Used (defaults) |
+|---|---|---|
+| Transformer | 800 kVA, the whole substation, for this one feeder | 200 kVA: the feeder's share (an 800 kVA substation supplies several feeders); IEC R10 size; same per-unit impedance (uk 4 %) |
+| Main cable (58 sections) | 0.249 ohm/km (Al 120 mm2), rating 272 A | one size up, Al 185 mm2, 0.164 ohm/km, 340 A |
+| Branch cables (75 sections) | 0.772 ohm/km (Cu 25 / Al 35-50 mm2) | unchanged, 145 A |
+
+The CIM file has no current limits. The ratings are the HD 603 S1 values for XLPE cables in earth (20 C, 3 loaded
+conductors). The published version is still available with `--trafo-kva 800 --main-r-ohm-km 0.249`, together with the
+env vars `TRAFO_KVA=800 MAIN_CABLE_A=272`.
+
+On the Austin data, the peak day (27 Aug 2018) with today's EVs is expected at about 98 % of the transformer and 84 % of the
+main cable. Doubling the EV homes takes the transformer over 100 % in the evening hours.
+
+Limitations:
+- The model is balanced (positive sequence), while the homes are single-phase. Real per-phase voltages are lower and
+  phase currents are higher.
+- The data is hourly, so the short charger peaks inside an hour are averaged out.
+- Both effects make the results optimistic: the real network breaks earlier.
 
 How the scenarios are built (`service/scenarios.py`):
 - **Added EVs**: a home that gets an EV draws a real charging day of an Austin EV home from the 3 weeks around the
@@ -24,13 +50,14 @@ How the scenarios are built (`service/scenarios.py`):
 - **Reactive power**: pf 0.95 for consumption.
 
 ```
-POST /scenarios        {"days": ["peak", "pv"], "scenarios": [{"name": "ev30", "n_ev": 30}], "v_min_pu": 0.90}
+POST /scenarios        {"days": ["peak"], "scenarios": [{"name": "ev20", "n_ev": 20}], "v_min_pu": 0.95}
                        every field is optional; {} runs the defaults (about 20 power flows, about 2 min)
 GET  /scenarios/{id}   status, per day and scenario: V min / V max, transformer %, violations, hosting capacity
 GET  /site             the homes, the EV / PV homes in the data, the chosen days, which unit sits on which load point
 ```
 Results go to InfluxDB (database `openaiflex`):
-- `lv_scenario,site,day_type,scenario` with `vmin_pu, vmax_pu, trafo_loading_pct, max_line_current_a, net_load_kw`.
+- `lv_scenario,site,day_type,scenario` with `vmin_pu, vmax_pu, trafo_loading_pct, max_line_loading_pct,
+  max_line_current_a, net_load_kw`.
   Hours 00-23 of the studied day (Austin local time) are written on 2030-01-01 UTC.
 - `lv_hosting,site` with `max_ev_homes, max_pv_homes, max_pv_scale_all_homes`.
 
@@ -47,13 +74,14 @@ kubectl -n sogno create secret generic twinrev-db \
   --from-literal=TWINREV_DB_URL="postgresql+psycopg2://postgres:${PW}@postgres.digital-twin:5432/postgres"
 ```
 
-**1. The LV feeder in TWIN-REV.** TWIN-REV takes the single `cel3_*.zip` in `dpsim_assets` as cell 3.
+**1. The LV feeder in TWIN-REV.** TWIN-REV takes the single `cel3_*.zip` in `dpsim_assets` as cell 3. Give every
+changed grid a new archive name, because TWIN-REV's DPsim service keeps the XMLs of a name it has already seen.
 ```bash
 git clone https://github.com/dpsim-simulator/cim-grid-data ~/cim-grid-data
 cd ~/substation-flexibility/twinrev
-python3 cim/make_lv_zip.py ~/cim-grid-data/IEEE_EU_LV/IEEE_EU_LV_reduced cel3_lv.zip
+python3 cim/make_lv_zip.py ~/cim-grid-data/IEEE_EU_LV/IEEE_EU_LV_reduced cel3_lv200.zip
 A=~/TwinRev/digital_twin_backend/fast_api/apisrc/dpsim_assets
-rm -f $A/cel3_*.zip && cp cel3_lv.zip $A/             # only one cel3_* archive
+rm -f $A/cel3_*.zip && cp cel3_lv200.zip $A/          # only one cel3_* archive
 cd ~/TwinRev
 sudo docker build -t cvdt/dt-backend:local digital_twin_backend/fast_api
 sudo docker save cvdt/dt-backend:local | sudo k3s ctr images import -
@@ -99,7 +127,7 @@ source. Pick the day (`peak` / `pv`) at the top.
 cd twinrev && python3 -m pytest -q tests      # scenario construction on synthetic data (no DPsim needed)
 ```
 The full chain was tested on synthetic data:
-- DPsim 1.4 with TWIN-REV's DSO router and its dpsv service, IEEE EU LV feeder, 55 units, 22 power flows.
+- DPsim 1.4 with TWIN-REV's DSO router and its dpsv service, the sized feeder, 55 units, 21 power flows.
 - DPsim on this feeder matches the NEPLAN load flow in the same CIM export within 0.002 V at all 135 nodes.
 
 ## Files
@@ -107,5 +135,6 @@ The full chain was tested on synthetic data:
 - `service/scenarios.py`: Austin data and scenario construction.
 - `service/grid.py`: profiles into TWIN-REV, pipeline call, voltages and transformer loading.
 - `cim/make_lv_zip.py`: IEEE EU LV CIM to TWIN-REV cell-3 archive. Loads are renamed `lod_01..55`, because dpsv
-  matches profiles by name prefix.
+  matches profiles by name prefix. Transformer share and main cable size are options.
+- `service/lv_lines.json`: cable class of each line, from the CIM (`--lines-json`), for the thermal ratings.
 - `tests/`: synthetic data generator and unit tests.

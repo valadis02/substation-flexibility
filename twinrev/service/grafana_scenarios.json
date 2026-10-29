@@ -8,7 +8,7 @@
    "pluginName": "InfluxDB"
   }
  ],
- "title": "OpenAIFlex - TWIN-REV scenarios (IEEE EU LV, Austin homes)",
+ "title": "OpenAIFlex - TWIN-REV scenarios (LV feeder, 55 Austin homes)",
  "uid": "openaiflex-twinrev-scenarios",
  "description": "What-if EV / PV adoption on a digital twin of a 55-home LV substation. Hours 00-23 of the studied day (Austin local time) are shown on 2030-01-01.",
  "schemaVersion": 39,
@@ -229,7 +229,7 @@
      "alias": "$tag_scenario"
     }
    ],
-   "description": "Red line: default v_min_pu 0.90.",
+   "description": "Red line: default planning limit v_min_pu 0.95.",
    "fieldConfig": {
     "defaults": {
      "unit": "none",
@@ -251,7 +251,7 @@
        },
        {
         "color": "red",
-        "value": 0.9
+        "value": 0.95
        }
       ]
      }
@@ -299,7 +299,7 @@
      "alias": "$tag_scenario"
     }
    ],
-   "description": "Red line: default v_max_pu 1.10.",
+   "description": "Red line: default planning limit v_max_pu 1.05.",
    "fieldConfig": {
     "defaults": {
      "unit": "none",
@@ -321,7 +321,7 @@
        },
        {
         "color": "red",
-        "value": 1.1
+        "value": 1.05
        }
       ]
      }
@@ -345,7 +345,7 @@
   {
    "id": 6,
    "type": "timeseries",
-   "title": "Transformer loading (% of 800 kVA)",
+   "title": "Transformer loading (% of the feeder's 200 kVA)",
    "datasource": {
     "type": "influxdb",
     "uid": "${DS_INFLUX}"
@@ -469,7 +469,7 @@
   {
    "id": 8,
    "type": "timeseries",
-   "title": "Largest line current (A; the CIM has no line ratings)",
+   "title": "Most loaded cable (% of thermal rating)",
    "datasource": {
     "type": "influxdb",
     "uid": "${DS_INFLUX}"
@@ -489,19 +489,35 @@
      },
      "rawQuery": true,
      "resultFormat": "time_series",
-     "query": "SELECT mean(\"max_line_current_a\") FROM \"lv_scenario\" WHERE \"site\"='$site' AND \"day_type\"='$day_type' AND $timeFilter GROUP BY time(1h), \"scenario\" fill(null)",
+     "query": "SELECT mean(\"max_line_loading_pct\") FROM \"lv_scenario\" WHERE \"site\"='$site' AND \"day_type\"='$day_type' AND $timeFilter GROUP BY time(1h), \"scenario\" fill(null)",
      "alias": "$tag_scenario"
     }
    ],
-   "description": "",
+   "description": "Main cable Al 185 mm2 340 A, branches 145 A (HD 603 S1, XLPE in earth).",
    "fieldConfig": {
     "defaults": {
-     "unit": "amp",
+     "unit": "percent",
      "custom": {
       "lineWidth": 2,
       "spanNulls": true,
       "showPoints": "always",
-      "pointSize": 4
+      "pointSize": 4,
+      "thresholdsStyle": {
+       "mode": "line"
+      }
+     },
+     "thresholds": {
+      "mode": "absolute",
+      "steps": [
+       {
+        "color": "transparent",
+        "value": null
+       },
+       {
+        "color": "red",
+        "value": 100
+       }
+      ]
      }
     },
     "overrides": []
@@ -543,7 +559,7 @@
      },
      "rawQuery": true,
      "resultFormat": "table",
-     "query": "SELECT min(\"vmin_pu\") AS \"V min (pu)\", max(\"vmax_pu\") AS \"V max (pu)\", max(\"trafo_loading_pct\") AS \"trafo max (%)\", max(\"net_load_kw\") AS \"peak net (kW)\", min(\"net_load_kw\") AS \"min net (kW)\" FROM \"lv_scenario\" WHERE \"site\"='$site' AND \"day_type\"='$day_type' AND $timeFilter GROUP BY \"scenario\""
+     "query": "SELECT min(\"vmin_pu\") AS \"V min (pu)\", max(\"vmax_pu\") AS \"V max (pu)\", max(\"trafo_loading_pct\") AS \"trafo max (%)\", max(\"max_line_loading_pct\") AS \"cable max (%)\", max(\"net_load_kw\") AS \"peak net (kW)\", min(\"net_load_kw\") AS \"min net (kW)\" FROM \"lv_scenario\" WHERE \"site\"='$site' AND \"day_type\"='$day_type' AND $timeFilter GROUP BY \"scenario\""
     }
    ],
    "fieldConfig": {

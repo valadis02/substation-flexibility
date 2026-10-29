@@ -3,9 +3,17 @@
 Homes are placed on the feeder's load points (lod_01 ... lod_55, renamed by twinrev/cim/make_lv_zip.py); load points
 without a home get zero. Profiles go to TWIN-REV's table dso_power_profiles_data_cel3 and each run is
 POST /dso/dpsim/run-pipeline (its DPsim service simulates). Results: LV voltages (pu of 400 V), transformer loading
-(% of 800 kVA, the feeder's rating), largest line current (A; the CIM export has no line ratings).
+(% of TRAFO_KVA) and line loading (% of the cable's thermal rating).
+
+The grid is the feeder as sized for the Austin homes by twinrev/cim/make_lv_zip.py (defaults; the env values here must
+match the archive in TWIN-REV):
+  TRAFO_KVA 200     the feeder's share of the 800 kVA substation (same per-unit impedance)
+  cables            the CIM has no current limits; two cable classes (lv_lines.json, from the CIM): main, upsized to
+                    Al 185 mm2 (0.164 ohm/km), and branch 0.772 ohm/km (= Cu 25 mm2 or Al 35-50 mm2). Ratings: HD 603 S1
+                    values for XLPE cables in earth (20 C, 3 loaded conductors): Al 185 340 A (MAIN_CABLE_A);
+                    Cu 25 148 A / Al 35 138 A -> 145 A (BRANCH_CABLE_A). Published Al 120 would be 272 A.
 """
-import json, urllib.request
+import json, os, urllib.request
 from datetime import datetime, timedelta
 
 import numpy as np
@@ -13,8 +21,11 @@ import pandas as pd
 
 N_LOAD_POINTS = 55
 LV_BASE_V = 400.0
-TRAFO_KVA = 800.0
+TRAFO_KVA = float(os.environ.get("TRAFO_KVA", "200"))
 TRAFO = "TR1"
+CABLE_A = {"main": float(os.environ.get("MAIN_CABLE_A", "340")), "branch": float(os.environ.get("BRANCH_CABLE_A", "145"))}
+_LINES = json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "lv_lines.json")))["lines"]
+LINE_RATING_A = {name: CABLE_A[v["cls"]] for name, v in _LINES.items()}
 REPLACE_MAP = {"lod_": "LOD_lod_"}
 RUN_DAY = datetime(2030, 1, 1)           # placeholder date of the profiles in TWIN-REV's table (overwritten per run)
 
@@ -66,17 +77,22 @@ def run_pipeline(twinrev_url, timeout=180):
 
 
 def grid_state(result):
-    """Per hour: lowest / highest LV voltage (pu), worst node, transformer loading (%), largest line current (A)."""
+    """Per hour: lowest / highest LV voltage (pu), worst node, transformer loading (%), highest line loading (%)."""
     res = {k: np.asarray(v, dtype=float) for k, v in result.items() if isinstance(v, list) and k != "time"}
     nodes = sorted(k[:-5] for k in res if k.endswith("_V.re"))
     V = pd.DataFrame({n: np.hypot(res[f"{n}_V.re"], res[f"{n}_V.im"]) for n in nodes})
     V = V.loc[:, V.mean() < 1000] / LV_BASE_V                        # LV nodes only (the 11 kV side is excluded)
     lines = sorted({k[:-7] for k in res if k.endswith("_I_0.re")} - {TRAFO})
+    missing = [l for l in lines if l not in LINE_RATING_A]
+    if missing:
+        raise RuntimeError(f"no rating for lines {missing[:5]} (lv_lines.json does not match the grid)")
     I = pd.DataFrame({l: np.hypot(res[f"{l}_I_0.re"], res[f"{l}_I_0.im"]) for l in lines})
+    L = 100 * I / pd.Series(LINE_RATING_A)[lines]
     s_kva = np.hypot(res[f"{TRAFO}_P_0"], res[f"{TRAFO}_Q_0"]) / 1000.0
     return pd.DataFrame({"vmin_pu": V.min(axis=1), "vmax_pu": V.max(axis=1), "worst_low_node": V.idxmin(axis=1),
                          "worst_high_node": V.idxmax(axis=1), "trafo_loading_pct": 100 * s_kva / TRAFO_KVA,
-                         "max_line_current_a": I.max(axis=1), "busiest_line": I.idxmax(axis=1)})
+                         "max_line_loading_pct": L.max(axis=1), "busiest_line": L.idxmax(axis=1),
+                         "max_line_current_a": I.max(axis=1)})
 
 
 def violations(state, lim):
@@ -87,4 +103,15 @@ def violations(state, lim):
         v.append(f"overvoltage {state.vmax_pu.max():.3f} pu at {int(state.vmax_pu.idxmax())}:00 ({state.worst_high_node[state.vmax_pu.idxmax()]})")
     if state.trafo_loading_pct.max() > lim["trafo_max_pct"]:
         v.append(f"transformer {state.trafo_loading_pct.max():.0f}% at {int(state.trafo_loading_pct.idxmax())}:00")
+    if state.max_line_loading_pct.max() > lim["line_max_pct"]:
+        h = state.max_line_loading_pct.idxmax()
+        v.append(f"cable {state.max_line_loading_pct.max():.0f}% at {int(h)}:00 ({state.busiest_line[h]})")
     return v
+
+
+def binding(state, lim):
+    """Which limits are broken in how many hours (for flexibility needs)."""
+    return {"undervoltage_h": int((state.vmin_pu < lim["v_min_pu"]).sum()),
+            "overvoltage_h": int((state.vmax_pu > lim["v_max_pu"]).sum()),
+            "transformer_h": int((state.trafo_loading_pct > lim["trafo_max_pct"]).sum()),
+            "cable_h": int((state.max_line_loading_pct > lim["line_max_pct"]).sum())}
