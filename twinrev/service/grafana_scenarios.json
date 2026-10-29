@@ -1,0 +1,567 @@
+{
+ "__inputs": [
+  {
+   "name": "DS_INFLUX",
+   "label": "InfluxDB",
+   "type": "datasource",
+   "pluginId": "influxdb",
+   "pluginName": "InfluxDB"
+  }
+ ],
+ "title": "OpenAIFlex - TWIN-REV scenarios (IEEE EU LV, Austin homes)",
+ "uid": "openaiflex-twinrev-scenarios",
+ "description": "What-if EV / PV adoption on a digital twin of a 55-home LV substation. Hours 00-23 of the studied day (Austin local time) are shown on 2030-01-01.",
+ "schemaVersion": 39,
+ "version": 1,
+ "timezone": "utc",
+ "time": {
+  "from": "2030-01-01T00:00:00.000Z",
+  "to": "2030-01-02T00:00:00.000Z"
+ },
+ "templating": {
+  "list": [
+   {
+    "name": "site",
+    "type": "textbox",
+    "label": "site",
+    "query": "austin",
+    "current": {
+     "text": "austin",
+     "value": "austin"
+    }
+   },
+   {
+    "name": "day_type",
+    "type": "custom",
+    "label": "day",
+    "query": "peak,pv",
+    "current": {
+     "text": "peak",
+     "value": "peak"
+    },
+    "options": [
+     {
+      "text": "peak",
+      "value": "peak",
+      "selected": true
+     },
+     {
+      "text": "pv",
+      "value": "pv",
+      "selected": false
+     }
+    ]
+   }
+  ]
+ },
+ "panels": [
+  {
+   "id": 1,
+   "type": "stat",
+   "title": "Max EV homes (of 55) before a limit is broken",
+   "datasource": {
+    "type": "influxdb",
+    "uid": "${DS_INFLUX}"
+   },
+   "gridPos": {
+    "x": 0,
+    "y": 0,
+    "w": 8,
+    "h": 4
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "datasource": {
+      "type": "influxdb",
+      "uid": "${DS_INFLUX}"
+     },
+     "rawQuery": true,
+     "resultFormat": "time_series",
+     "query": "SELECT last(\"max_ev_homes\") FROM \"lv_hosting\" WHERE \"site\"='$site' AND $timeFilter"
+    }
+   ],
+   "description": "Peak day. Homes beyond the data's EV homes draw real EV charging days. 55 = no limit broken even with an EV in every home.",
+   "fieldConfig": {
+    "defaults": {
+     "unit": "none",
+     "decimals": 0,
+     "color": {
+      "mode": "fixed",
+      "fixedColor": "#3D7DCA"
+     },
+     "noValue": "not run"
+    },
+    "overrides": []
+   },
+   "options": {
+    "colorMode": "background",
+    "graphMode": "none",
+    "reduceOptions": {
+     "calcs": [
+      "lastNotNull"
+     ]
+    }
+   }
+  },
+  {
+   "id": 2,
+   "type": "stat",
+   "title": "Max PV homes (of 55) before a limit is broken",
+   "datasource": {
+    "type": "influxdb",
+    "uid": "${DS_INFLUX}"
+   },
+   "gridPos": {
+    "x": 8,
+    "y": 0,
+    "w": 8,
+    "h": 4
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "datasource": {
+      "type": "influxdb",
+      "uid": "${DS_INFLUX}"
+     },
+     "rawQuery": true,
+     "resultFormat": "time_series",
+     "query": "SELECT last(\"max_pv_homes\") FROM \"lv_hosting\" WHERE \"site\"='$site' AND $timeFilter"
+    }
+   ],
+   "description": "Lowest net-load day. 55 = no limit broken even with PV on every home.",
+   "fieldConfig": {
+    "defaults": {
+     "unit": "none",
+     "decimals": 0,
+     "color": {
+      "mode": "fixed",
+      "fixedColor": "#3D7DCA"
+     },
+     "noValue": "not run"
+    },
+    "overrides": []
+   },
+   "options": {
+    "colorMode": "background",
+    "graphMode": "none",
+    "reduceOptions": {
+     "calcs": [
+      "lastNotNull"
+     ]
+    }
+   }
+  },
+  {
+   "id": 3,
+   "type": "stat",
+   "title": "Max PV size multiplier, PV on every home",
+   "datasource": {
+    "type": "influxdb",
+    "uid": "${DS_INFLUX}"
+   },
+   "gridPos": {
+    "x": 16,
+    "y": 0,
+    "w": 8,
+    "h": 4
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "datasource": {
+      "type": "influxdb",
+      "uid": "${DS_INFLUX}"
+     },
+     "rawQuery": true,
+     "resultFormat": "time_series",
+     "query": "SELECT last(\"max_pv_scale_all_homes\") FROM \"lv_hosting\" WHERE \"site\"='$site' AND $timeFilter"
+    }
+   ],
+   "description": "Lowest net-load day, every home with PV; multiplier of the observed system sizes (searched up to 8x).",
+   "fieldConfig": {
+    "defaults": {
+     "unit": "x",
+     "decimals": 2,
+     "color": {
+      "mode": "fixed",
+      "fixedColor": "#3D7DCA"
+     },
+     "noValue": "not run"
+    },
+    "overrides": []
+   },
+   "options": {
+    "colorMode": "background",
+    "graphMode": "none",
+    "reduceOptions": {
+     "calcs": [
+      "lastNotNull"
+     ]
+    }
+   }
+  },
+  {
+   "id": 4,
+   "type": "timeseries",
+   "title": "Lowest voltage on the feeder (pu of 400 V)",
+   "datasource": {
+    "type": "influxdb",
+    "uid": "${DS_INFLUX}"
+   },
+   "gridPos": {
+    "x": 0,
+    "y": 4,
+    "w": 12,
+    "h": 9
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "datasource": {
+      "type": "influxdb",
+      "uid": "${DS_INFLUX}"
+     },
+     "rawQuery": true,
+     "resultFormat": "time_series",
+     "query": "SELECT mean(\"vmin_pu\") FROM \"lv_scenario\" WHERE \"site\"='$site' AND \"day_type\"='$day_type' AND $timeFilter GROUP BY time(1h), \"scenario\" fill(null)",
+     "alias": "$tag_scenario"
+    }
+   ],
+   "description": "Red line: default v_min_pu 0.90.",
+   "fieldConfig": {
+    "defaults": {
+     "unit": "none",
+     "custom": {
+      "lineWidth": 2,
+      "spanNulls": true,
+      "showPoints": "always",
+      "pointSize": 4,
+      "thresholdsStyle": {
+       "mode": "line"
+      }
+     },
+     "thresholds": {
+      "mode": "absolute",
+      "steps": [
+       {
+        "color": "transparent",
+        "value": null
+       },
+       {
+        "color": "red",
+        "value": 0.9
+       }
+      ]
+     }
+    },
+    "overrides": []
+   },
+   "options": {
+    "legend": {
+     "displayMode": "table",
+     "placement": "right",
+     "calcs": [
+      "min",
+      "max"
+     ]
+    },
+    "tooltip": {
+     "mode": "multi"
+    }
+   }
+  },
+  {
+   "id": 5,
+   "type": "timeseries",
+   "title": "Highest voltage on the feeder (pu of 400 V)",
+   "datasource": {
+    "type": "influxdb",
+    "uid": "${DS_INFLUX}"
+   },
+   "gridPos": {
+    "x": 12,
+    "y": 4,
+    "w": 12,
+    "h": 9
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "datasource": {
+      "type": "influxdb",
+      "uid": "${DS_INFLUX}"
+     },
+     "rawQuery": true,
+     "resultFormat": "time_series",
+     "query": "SELECT mean(\"vmax_pu\") FROM \"lv_scenario\" WHERE \"site\"='$site' AND \"day_type\"='$day_type' AND $timeFilter GROUP BY time(1h), \"scenario\" fill(null)",
+     "alias": "$tag_scenario"
+    }
+   ],
+   "description": "Red line: default v_max_pu 1.10.",
+   "fieldConfig": {
+    "defaults": {
+     "unit": "none",
+     "custom": {
+      "lineWidth": 2,
+      "spanNulls": true,
+      "showPoints": "always",
+      "pointSize": 4,
+      "thresholdsStyle": {
+       "mode": "line"
+      }
+     },
+     "thresholds": {
+      "mode": "absolute",
+      "steps": [
+       {
+        "color": "transparent",
+        "value": null
+       },
+       {
+        "color": "red",
+        "value": 1.1
+       }
+      ]
+     }
+    },
+    "overrides": []
+   },
+   "options": {
+    "legend": {
+     "displayMode": "table",
+     "placement": "right",
+     "calcs": [
+      "min",
+      "max"
+     ]
+    },
+    "tooltip": {
+     "mode": "multi"
+    }
+   }
+  },
+  {
+   "id": 6,
+   "type": "timeseries",
+   "title": "Transformer loading (% of 800 kVA)",
+   "datasource": {
+    "type": "influxdb",
+    "uid": "${DS_INFLUX}"
+   },
+   "gridPos": {
+    "x": 0,
+    "y": 13,
+    "w": 12,
+    "h": 9
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "datasource": {
+      "type": "influxdb",
+      "uid": "${DS_INFLUX}"
+     },
+     "rawQuery": true,
+     "resultFormat": "time_series",
+     "query": "SELECT mean(\"trafo_loading_pct\") FROM \"lv_scenario\" WHERE \"site\"='$site' AND \"day_type\"='$day_type' AND $timeFilter GROUP BY time(1h), \"scenario\" fill(null)",
+     "alias": "$tag_scenario"
+    }
+   ],
+   "description": "",
+   "fieldConfig": {
+    "defaults": {
+     "unit": "percent",
+     "custom": {
+      "lineWidth": 2,
+      "spanNulls": true,
+      "showPoints": "always",
+      "pointSize": 4,
+      "thresholdsStyle": {
+       "mode": "line"
+      }
+     },
+     "thresholds": {
+      "mode": "absolute",
+      "steps": [
+       {
+        "color": "transparent",
+        "value": null
+       },
+       {
+        "color": "red",
+        "value": 100
+       }
+      ]
+     }
+    },
+    "overrides": []
+   },
+   "options": {
+    "legend": {
+     "displayMode": "table",
+     "placement": "right",
+     "calcs": [
+      "min",
+      "max"
+     ]
+    },
+    "tooltip": {
+     "mode": "multi"
+    }
+   }
+  },
+  {
+   "id": 7,
+   "type": "timeseries",
+   "title": "Substation net load (kW, negative = reverse flow)",
+   "datasource": {
+    "type": "influxdb",
+    "uid": "${DS_INFLUX}"
+   },
+   "gridPos": {
+    "x": 12,
+    "y": 13,
+    "w": 12,
+    "h": 9
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "datasource": {
+      "type": "influxdb",
+      "uid": "${DS_INFLUX}"
+     },
+     "rawQuery": true,
+     "resultFormat": "time_series",
+     "query": "SELECT mean(\"net_load_kw\") FROM \"lv_scenario\" WHERE \"site\"='$site' AND \"day_type\"='$day_type' AND $timeFilter GROUP BY time(1h), \"scenario\" fill(null)",
+     "alias": "$tag_scenario"
+    }
+   ],
+   "description": "",
+   "fieldConfig": {
+    "defaults": {
+     "unit": "kwatt",
+     "custom": {
+      "lineWidth": 2,
+      "spanNulls": true,
+      "showPoints": "always",
+      "pointSize": 4
+     }
+    },
+    "overrides": []
+   },
+   "options": {
+    "legend": {
+     "displayMode": "table",
+     "placement": "right",
+     "calcs": [
+      "min",
+      "max"
+     ]
+    },
+    "tooltip": {
+     "mode": "multi"
+    }
+   }
+  },
+  {
+   "id": 8,
+   "type": "timeseries",
+   "title": "Largest line current (A; the CIM has no line ratings)",
+   "datasource": {
+    "type": "influxdb",
+    "uid": "${DS_INFLUX}"
+   },
+   "gridPos": {
+    "x": 0,
+    "y": 22,
+    "w": 12,
+    "h": 9
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "datasource": {
+      "type": "influxdb",
+      "uid": "${DS_INFLUX}"
+     },
+     "rawQuery": true,
+     "resultFormat": "time_series",
+     "query": "SELECT mean(\"max_line_current_a\") FROM \"lv_scenario\" WHERE \"site\"='$site' AND \"day_type\"='$day_type' AND $timeFilter GROUP BY time(1h), \"scenario\" fill(null)",
+     "alias": "$tag_scenario"
+    }
+   ],
+   "description": "",
+   "fieldConfig": {
+    "defaults": {
+     "unit": "amp",
+     "custom": {
+      "lineWidth": 2,
+      "spanNulls": true,
+      "showPoints": "always",
+      "pointSize": 4
+     }
+    },
+    "overrides": []
+   },
+   "options": {
+    "legend": {
+     "displayMode": "table",
+     "placement": "right",
+     "calcs": [
+      "min",
+      "max"
+     ]
+    },
+    "tooltip": {
+     "mode": "multi"
+    }
+   }
+  },
+  {
+   "id": 9,
+   "type": "table",
+   "title": "Scenario summary for the selected day",
+   "datasource": {
+    "type": "influxdb",
+    "uid": "${DS_INFLUX}"
+   },
+   "gridPos": {
+    "x": 12,
+    "y": 22,
+    "w": 12,
+    "h": 9
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "datasource": {
+      "type": "influxdb",
+      "uid": "${DS_INFLUX}"
+     },
+     "rawQuery": true,
+     "resultFormat": "table",
+     "query": "SELECT min(\"vmin_pu\") AS \"V min (pu)\", max(\"vmax_pu\") AS \"V max (pu)\", max(\"trafo_loading_pct\") AS \"trafo max (%)\", max(\"net_load_kw\") AS \"peak net (kW)\", min(\"net_load_kw\") AS \"min net (kW)\" FROM \"lv_scenario\" WHERE \"site\"='$site' AND \"day_type\"='$day_type' AND $timeFilter GROUP BY \"scenario\""
+    }
+   ],
+   "fieldConfig": {
+    "defaults": {
+     "decimals": 3
+    },
+    "overrides": []
+   },
+   "transformations": [
+    {
+     "id": "organize",
+     "options": {
+      "excludeByName": {
+       "Time": true
+      }
+     }
+    }
+   ]
+  }
+ ]
+}

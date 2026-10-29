@@ -1,7 +1,7 @@
-data/raw/
-outputs/
+**/data/raw/
+**/outputs/
 *.csv
-!docs/*.csv
+!**/docs/*.csv
 *.pkl
 __pycache__/
 .pytest_cache/
@@ -9,6 +9,10 @@ __pycache__/
 .env
 *.pdf.bak
 # Pecan Street Dataport: licence forbids redistribution
-data/processed/pecan*/
-data/crest/
-data/crest_indep/
+**/data/processed/pecan*/
+**/data/crest/
+**/data/crest_indep/
+# local Austin (Pecan Street) data for the TWIN-REV service, if kept inside the repo
+**/austin_data/
+# derived CIM archive for TWIN-REV (rebuild with twinrev/cim/make_lv_zip.py)
+twinrev/*.zip

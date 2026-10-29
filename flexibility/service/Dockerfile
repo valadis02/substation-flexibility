@@ -1,4 +1,4 @@
-# Build from the repository root:  docker build -f service/Dockerfile -t openaiflex/flex-envelope:0.1 .
+# Build from the flexibility/ folder:  docker build -f service/Dockerfile -t openaiflex/flex-envelope:0.1 .
 FROM python:3.11-slim
 WORKDIR /app
 RUN pip install --no-cache-dir numpy pandas scikit-learn fastapi "uvicorn[standard]"

@@ -1,0 +1,7 @@
+# keep licensed / local-only data out of the image
+data/processed/pecan*
+data/raw
+data/crest*
+**/austin_data
+**/__pycache__
+outputs

@@ -20,7 +20,8 @@ periods from `data/splits.json` are skipped).
 
 ## Deploy on the single-node stack (namespace `sogno`)
 ```bash
-sudo docker build -f service/Dockerfile -t openaiflex/flex-envelope:0.1 .      # from the repository root
+cd flexibility                                                                  # this microservice's folder
+sudo docker build -f service/Dockerfile -t openaiflex/flex-envelope:0.1 .
 sudo docker save openaiflex/flex-envelope:0.1 | sudo k3s ctr images import -
 kubectl apply -f service/k8s.yaml
 kubectl rollout status deployment/flex-envelope -n sogno

@@ -1,0 +1,53 @@
+# TWIN-REV scenario service (namespace sogno). Apply with the folder of the processed Austin data filled in:
+#   sed "s|__AUSTIN_DIR__|$HOME/substation-flexibility/flexibility/data/processed/pecan_austin|" service/k8s.yaml | kubectl apply -f -
+apiVersion: apps/v1
+kind: Deployment
+metadata: { name: twinrev-scenarios, namespace: sogno }
+spec:
+  replicas: 1
+  selector: { matchLabels: { app: twinrev-scenarios } }
+  template:
+    metadata: { labels: { app: twinrev-scenarios } }
+    spec:
+      containers:
+      - name: api
+        image: openaiflex/twinrev-scenarios:0.1
+        imagePullPolicy: Never          # image is imported into k3s locally, not pulled
+        ports: [ { containerPort: 8000 } ]
+        env:
+        - { name: INFLUX_URL, value: "http://influxdb.sogno:8086" }
+        - { name: INFLUX_DB, value: openaiflex }
+        - { name: AUSTIN_DATA_DIR, value: /data/austin }
+        - { name: TWINREV_URL, value: "http://dt-backend-service.digital-twin:8000" }
+        - name: TWINREV_DB_URL
+          valueFrom: { secretKeyRef: { name: twinrev-db, key: TWINREV_DB_URL } }
+        volumeMounts: [ { name: austin, mountPath: /data/austin, readOnly: true } ]
+        readinessProbe: { httpGet: { path: /health, port: 8000 }, initialDelaySeconds: 5, periodSeconds: 10 }
+        livenessProbe:  { httpGet: { path: /health, port: 8000 }, initialDelaySeconds: 20, periodSeconds: 20 }
+        resources:
+          requests: { cpu: 250m, memory: 512Mi }
+          limits:   { memory: 2Gi }
+      volumes:
+      - name: austin                    # Pecan Street data stays on this machine (Dataport licence)
+        hostPath: { path: __AUSTIN_DIR__, type: Directory }
+---
+apiVersion: v1
+kind: Service
+metadata: { name: twinrev-scenarios, namespace: sogno }
+spec:
+  selector: { app: twinrev-scenarios }
+  ports: [ { name: http, port: 8000, targetPort: 8000 } ]
+---
+# Lets this service write load profiles into TWIN-REV's PostgreSQL (TWIN-REV allows Postgres only from its own
+# namespace; its dt-backend on port 8000 is already open).
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata: { name: allow-openaiflex-twinrev-scenarios, namespace: digital-twin }
+spec:
+  podSelector: { matchLabels: { app: postgres } }
+  policyTypes: [Ingress]
+  ingress:
+  - from:
+    - namespaceSelector: { matchLabels: { kubernetes.io/metadata.name: sogno } }
+      podSelector: { matchLabels: { app: twinrev-scenarios } }
+    ports: [ { port: 5432 } ]
