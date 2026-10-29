@@ -31,7 +31,7 @@ class Config:
     # M5 flexibility envelope (weather + appliances; EV uses its sessions, see flexsub.flexibility)
     shift_window_h: int = 3         # energy can be moved from +-this many hours
     request_duration_h: int = 2     # length of the upward request block
-    cap_quantile: float = 0.9       # power cap: observed extra draw of shiftable load at that hour
+    cap_quantile: float = 0.9       # power cap: observed extra draw of flexible load at that hour and its two neighbours (T14)
     # M6 participation (applies to every flexible category, EV included)
     # M6 scenarios. The headline result is the technical maximum (every home, every event). Scenarios scale it by
     # enrolment x response rate (share of enrolled homes that actually respond to an event). Scenarios are only for

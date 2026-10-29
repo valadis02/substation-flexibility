@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata: { name: flex-envelope, namespace: sogno }
+spec:
+  replicas: 1
+  selector: { matchLabels: { app: flex-envelope } }
+  template:
+    metadata: { labels: { app: flex-envelope } }
+    spec:
+      containers:
+      - name: api
+        image: openaiflex/flex-envelope:0.1
+        imagePullPolicy: Never          # image is imported into k3s locally, not pulled
+        ports: [ { containerPort: 8000 } ]
+        env:
+        - { name: INFLUX_URL, value: "http://influxdb.sogno:8086" }
+        - { name: INFLUX_DB, value: openaiflex }
+        readinessProbe: { httpGet: { path: /health, port: 8000 }, initialDelaySeconds: 5, periodSeconds: 10 }
+        livenessProbe:  { httpGet: { path: /health, port: 8000 }, initialDelaySeconds: 20, periodSeconds: 20 }
+        resources:
+          requests: { cpu: 250m, memory: 512Mi }
+          limits:   { memory: 2Gi }
+---
+apiVersion: v1
+kind: Service
+metadata: { name: flex-envelope, namespace: sogno }
+spec:
+  selector: { app: flex-envelope }
+  ports: [ { name: http, port: 8000, targetPort: 8000 } ]

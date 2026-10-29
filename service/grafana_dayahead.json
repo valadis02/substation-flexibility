@@ -1,0 +1,488 @@
+{
+ "__inputs": [
+  {
+   "name": "DS_INFLUX",
+   "label": "InfluxDB",
+   "type": "datasource",
+   "pluginId": "influxdb",
+   "pluginName": "InfluxDB"
+  }
+ ],
+ "title": "OpenAIFlex - day-ahead (substation)",
+ "uid": "openaiflex-dayahead",
+ "schemaVersion": 39,
+ "version": 3,
+ "timezone": "Europe/London",
+ "time": {
+  "from": "2015-01-26T00:00:00.000Z",
+  "to": "2015-01-27T00:00:00.000Z"
+ },
+ "panels": [
+  {
+   "id": 1,
+   "type": "timeseries",
+   "title": "Day-ahead forecast of substation load (kW), 90% band",
+   "description": "Trained on meter data before the target day only. 'actual' is read after the prediction and is shown for evaluation.",
+   "datasource": {
+    "type": "influxdb",
+    "uid": "${DS_INFLUX}"
+   },
+   "gridPos": {
+    "x": 0,
+    "y": 0,
+    "w": 24,
+    "h": 9
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "datasource": {
+      "type": "influxdb",
+      "uid": "${DS_INFLUX}"
+     },
+     "rawQuery": true,
+     "resultFormat": "time_series",
+     "alias": "$col",
+     "query": "SELECT mean(\"actual_kw\") AS \"actual_kw\",mean(\"forecast_kw\") AS \"forecast_kw\",mean(\"forecast_lo_kw\") AS \"forecast_lo_kw\",mean(\"forecast_hi_kw\") AS \"forecast_hi_kw\" FROM \"dayahead\" WHERE \"site\"='$site' AND $timeFilter GROUP BY time(1h) fill(null)"
+    }
+   ],
+   "fieldConfig": {
+    "defaults": {
+     "unit": "none",
+     "custom": {
+      "drawStyle": "line",
+      "lineWidth": 2,
+      "fillOpacity": 0,
+      "showPoints": "auto",
+      "spanNulls": false,
+      "barAlignment": 0
+     }
+    },
+    "overrides": [
+     {
+      "matcher": {
+       "id": "byName",
+       "options": "actual_kw"
+      },
+      "properties": [
+       {
+        "id": "color",
+        "value": {
+         "mode": "fixed",
+         "fixedColor": "#F2F2F2"
+        }
+       },
+       {
+        "id": "displayName",
+        "value": "actual (evaluation only)"
+       }
+      ]
+     },
+     {
+      "matcher": {
+       "id": "byName",
+       "options": "forecast_kw"
+      },
+      "properties": [
+       {
+        "id": "color",
+        "value": {
+         "mode": "fixed",
+         "fixedColor": "#D9622B"
+        }
+       },
+       {
+        "id": "custom.lineStyle",
+        "value": {
+         "fill": "dash",
+         "dash": [
+          6,
+          4
+         ]
+        }
+       },
+       {
+        "id": "displayName",
+        "value": "forecast"
+       }
+      ]
+     },
+     {
+      "matcher": {
+       "id": "byName",
+       "options": "forecast_hi_kw"
+      },
+      "properties": [
+       {
+        "id": "color",
+        "value": {
+         "mode": "fixed",
+         "fixedColor": "#D9622B"
+        }
+       },
+       {
+        "id": "custom.lineWidth",
+        "value": 0
+       },
+       {
+        "id": "custom.fillBelowTo",
+        "value": "forecast_lo_kw"
+       },
+       {
+        "id": "custom.fillOpacity",
+        "value": 15
+       },
+       {
+        "id": "displayName",
+        "value": "band high"
+       }
+      ]
+     },
+     {
+      "matcher": {
+       "id": "byName",
+       "options": "forecast_lo_kw"
+      },
+      "properties": [
+       {
+        "id": "color",
+        "value": {
+         "mode": "fixed",
+         "fixedColor": "#D9622B"
+        }
+       },
+       {
+        "id": "custom.lineWidth",
+        "value": 0
+       },
+       {
+        "id": "displayName",
+        "value": "band low"
+       }
+      ]
+     }
+    ]
+   },
+   "options": {
+    "legend": {
+     "displayMode": "table",
+     "placement": "right",
+     "calcs": [
+      "mean",
+      "max"
+     ]
+    },
+    "tooltip": {
+     "mode": "multi"
+    }
+   }
+  },
+  {
+   "id": 2,
+   "type": "timeseries",
+   "title": "kW down: estimate vs truth",
+   "description": "Bars: method (each home's hourly total + weather only). Line: the same rule applied to the sub-metered appliances and heaters over the same 35 days.",
+   "datasource": {
+    "type": "influxdb",
+    "uid": "${DS_INFLUX}"
+   },
+   "gridPos": {
+    "x": 0,
+    "y": 9,
+    "w": 12,
+    "h": 10
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "datasource": {
+      "type": "influxdb",
+      "uid": "${DS_INFLUX}"
+     },
+     "rawQuery": true,
+     "resultFormat": "time_series",
+     "alias": "$col",
+     "query": "SELECT mean(\"down_kw\") AS \"down_kw\",mean(\"true_down_kw\") AS \"true_down_kw\" FROM \"dayahead\" WHERE \"site\"='$site' AND $timeFilter GROUP BY time(1h) fill(null)"
+    }
+   ],
+   "fieldConfig": {
+    "defaults": {
+     "unit": "none",
+     "min": 0,
+     "custom": {
+      "drawStyle": "bars",
+      "lineWidth": 1,
+      "fillOpacity": 60,
+      "showPoints": "never",
+      "spanNulls": false
+     }
+    },
+    "overrides": [
+     {
+      "matcher": {
+       "id": "byName",
+       "options": "down_kw"
+      },
+      "properties": [
+       {
+        "id": "color",
+        "value": {
+         "mode": "fixed",
+         "fixedColor": "#1F7A63"
+        }
+       },
+       {
+        "id": "displayName",
+        "value": "down estimate (method)"
+       }
+      ]
+     },
+     {
+      "matcher": {
+       "id": "byName",
+       "options": "true_down_kw"
+      },
+      "properties": [
+       {
+        "id": "color",
+        "value": {
+         "mode": "fixed",
+         "fixedColor": "#F2F2F2"
+        }
+       },
+       {
+        "id": "custom.drawStyle",
+        "value": "line"
+       },
+       {
+        "id": "custom.lineWidth",
+        "value": 2
+       },
+       {
+        "id": "custom.fillOpacity",
+        "value": 0
+       },
+       {
+        "id": "displayName",
+        "value": "true down (sub-metered)"
+       }
+      ]
+     }
+    ]
+   },
+   "options": {
+    "legend": {
+     "displayMode": "table",
+     "placement": "bottom",
+     "calcs": [
+      "mean",
+      "max",
+      "sum"
+     ]
+    },
+    "tooltip": {
+     "mode": "multi"
+    }
+   }
+  },
+  {
+   "id": 4,
+   "type": "timeseries",
+   "title": "kW up: estimate vs truth",
+   "description": "Bars: method. Line: the same rule on the sub-metered decomposition of the same 35 days. Up is a potential, so there is no 'realised' value.",
+   "datasource": {
+    "type": "influxdb",
+    "uid": "${DS_INFLUX}"
+   },
+   "gridPos": {
+    "x": 12,
+    "y": 9,
+    "w": 12,
+    "h": 10
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "datasource": {
+      "type": "influxdb",
+      "uid": "${DS_INFLUX}"
+     },
+     "rawQuery": true,
+     "resultFormat": "time_series",
+     "alias": "$col",
+     "query": "SELECT mean(\"up_kw\") AS \"up_kw\",mean(\"true_up_kw\") AS \"true_up_kw\" FROM \"dayahead\" WHERE \"site\"='$site' AND $timeFilter GROUP BY time(1h) fill(null)"
+    }
+   ],
+   "fieldConfig": {
+    "defaults": {
+     "unit": "none",
+     "min": 0,
+     "custom": {
+      "drawStyle": "bars",
+      "lineWidth": 1,
+      "fillOpacity": 60,
+      "showPoints": "never",
+      "spanNulls": false
+     }
+    },
+    "overrides": [
+     {
+      "matcher": {
+       "id": "byName",
+       "options": "up_kw"
+      },
+      "properties": [
+       {
+        "id": "color",
+        "value": {
+         "mode": "fixed",
+         "fixedColor": "#B4461A"
+        }
+       },
+       {
+        "id": "displayName",
+        "value": "up estimate (method)"
+       }
+      ]
+     },
+     {
+      "matcher": {
+       "id": "byName",
+       "options": "true_up_kw"
+      },
+      "properties": [
+       {
+        "id": "color",
+        "value": {
+         "mode": "fixed",
+         "fixedColor": "#F2F2F2"
+        }
+       },
+       {
+        "id": "custom.drawStyle",
+        "value": "line"
+       },
+       {
+        "id": "custom.lineWidth",
+        "value": 2
+       },
+       {
+        "id": "custom.fillOpacity",
+        "value": 0
+       },
+       {
+        "id": "displayName",
+        "value": "true up (sub-metered)"
+       }
+      ]
+     }
+    ]
+   },
+   "options": {
+    "legend": {
+     "displayMode": "table",
+     "placement": "bottom",
+     "calcs": [
+      "mean",
+      "max",
+      "sum"
+     ]
+    },
+    "tooltip": {
+     "mode": "multi"
+    }
+   }
+  },
+  {
+   "id": 3,
+   "type": "timeseries",
+   "title": "Temperature (C)",
+   "description": "",
+   "datasource": {
+    "type": "influxdb",
+    "uid": "${DS_INFLUX}"
+   },
+   "gridPos": {
+    "x": 0,
+    "y": 19,
+    "w": 24,
+    "h": 6
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "datasource": {
+      "type": "influxdb",
+      "uid": "${DS_INFLUX}"
+     },
+     "rawQuery": true,
+     "resultFormat": "time_series",
+     "alias": "$col",
+     "query": "SELECT mean(\"temp_c\") AS \"temp_c\" FROM \"dayahead\" WHERE \"site\"='$site' AND $timeFilter GROUP BY time(1h) fill(null)"
+    }
+   ],
+   "fieldConfig": {
+    "defaults": {
+     "unit": "celsius",
+     "custom": {
+      "drawStyle": "line",
+      "lineWidth": 2,
+      "fillOpacity": 0,
+      "showPoints": "auto",
+      "spanNulls": false,
+      "barAlignment": 0
+     }
+    },
+    "overrides": [
+     {
+      "matcher": {
+       "id": "byName",
+       "options": "temp_c"
+      },
+      "properties": [
+       {
+        "id": "color",
+        "value": {
+         "mode": "fixed",
+         "fixedColor": "#2B6CB0"
+        }
+       }
+      ]
+     }
+    ]
+   },
+   "options": {
+    "legend": {
+     "displayMode": "table",
+     "placement": "right",
+     "calcs": [
+      "mean",
+      "max"
+     ]
+    },
+    "tooltip": {
+     "mode": "multi"
+    }
+   }
+  }
+ ],
+ "templating": {
+  "list": [
+   {
+    "name": "site",
+    "label": "Site",
+    "type": "query",
+    "datasource": {
+     "type": "influxdb",
+     "uid": "${DS_INFLUX}"
+    },
+    "query": "SHOW TAG VALUES FROM \"dayahead\" WITH KEY = \"site\"",
+    "refresh": 1,
+    "current": {
+     "text": "refit",
+     "value": "refit"
+    }
+   }
+  ]
+ }
+}
