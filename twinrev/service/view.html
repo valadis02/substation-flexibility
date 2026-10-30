@@ -5,57 +5,65 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>LV Feeder Twin</title>
 <style>
+/* Grafana dark look */
 :root {
-  --bg: #f6f7f9; --panel: #ffffff; --ink: #1c2330; --muted: #677285; --line: #d9dee6; --grid: #b8c0cc;
-  --ok: #2e9e5b; --warn: #d99a00; --bad: #d64545; --pv: #2f7fd1; --accent: #3d63dd;
-}
-@media (prefers-color-scheme: dark) {
-  :root { --bg: #111418; --panel: #191d23; --ink: #e6e9ee; --muted: #9aa4b2; --line: #2b313a; --grid: #4a525e;
-          --ok: #3fbf74; --warn: #f0b429; --bad: #f05d5d; --pv: #5aa2ee; --accent: #7b96ff; }
+  --bg: #111217; --panel: #181b1f; --ink: #ccccdc; --strong: #ffffff; --muted: #8e8e9e; --line: #2c3235; --grid: #464c54;
+  --ok: #73bf69; --warn: #ff9830; --bad: #f2495c; --pv: #5794f2; --accent: #3d71d9; --field: #111217;
 }
 * { box-sizing: border-box; }
-body { margin: 0; background: var(--bg); color: var(--ink); font: 14px/1.4 system-ui, -apple-system, "Segoe UI", sans-serif; }
-header { padding: 14px 20px 10px; display: flex; flex-wrap: wrap; gap: 10px 24px; align-items: baseline; }
-h1 { font-size: 18px; margin: 0; font-weight: 650; }
-.sub { color: var(--muted); font-size: 13px; }
-.controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 0 20px 10px; }
-.controls label { color: var(--muted); font-size: 12px; display: flex; gap: 6px; align-items: center; }
-select, input, button { font: inherit; color: var(--ink); background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 5px 8px; }
-input[type=number] { width: 64px; }
-button { cursor: pointer; }
-button.preset.on { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
-button.run { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
-#status { color: var(--muted); font-size: 12px; min-width: 160px; }
-.strip { display: grid; grid-template-columns: 40px repeat(24, 1fr); gap: 3px; padding: 0 20px 4px; align-items: center; }
-.strip button { padding: 0; height: 30px; border-radius: 4px; border: 2px solid transparent; font-size: 11px; color: #fff; font-weight: 600; }
-.strip button.sel { border-color: var(--ink); }
-.strip .play { background: var(--panel); color: var(--ink); border: 1px solid var(--line); font-size: 14px; }
-.legend-strip { padding: 0 20px 8px; color: var(--muted); font-size: 12px; }
-main { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 14px; padding: 0 20px 20px; }
+html { color-scheme: dark; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 13px/1.45 Inter, "Helvetica Neue", Arial, system-ui, sans-serif; }
+header { padding: 12px 16px 8px; display: flex; flex-wrap: wrap; gap: 6px 18px; align-items: baseline; border-bottom: 1px solid var(--line); background: var(--panel); }
+h1 { font-size: 16px; margin: 0; font-weight: 500; color: var(--strong); }
+.sub { color: var(--muted); font-size: 12px; }
+.controls { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; padding: 10px 16px; }
+.controls label { color: var(--muted); font-size: 12px; display: flex; gap: 0; align-items: center; }
+.controls label > *:not(:first-child) { margin-left: 0; }
+.controls label { background: var(--panel); border: 1px solid var(--line); border-radius: 2px; padding-left: 8px; }
+.controls label select, .controls label input { border: 0; border-left: 1px solid var(--line); border-radius: 0; margin-left: 8px; }
+select, input, button { font: inherit; color: var(--ink); background: var(--field); border: 1px solid var(--line); border-radius: 2px; padding: 5px 8px; height: 30px; }
+input[type=number] { width: 60px; }
+button { cursor: pointer; background: var(--panel); }
+button:hover { border-color: var(--grid); color: var(--strong); }
+button.preset.on { background: #22252b; border-color: var(--accent); color: var(--strong); }
+button.run { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 500; }
+button.run:disabled { opacity: .6; }
+#status { color: var(--muted); font-size: 12px; min-width: 160px; margin-left: 6px; }
+.strip { display: grid; grid-template-columns: 40px repeat(24, 1fr); gap: 2px; padding: 0 16px 4px; align-items: center; }
+.strip button { padding: 0; height: 28px; border-radius: 2px; border: 2px solid transparent; font-size: 11px; color: #111217; font-weight: 600; }
+.strip button.sel { border-color: var(--strong); }
+.strip .play { background: var(--panel); color: var(--ink); border: 1px solid var(--line); font-size: 13px; }
+.legend-strip { padding: 0 16px 10px; color: var(--muted); font-size: 11px; }
+main { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 8px; padding: 0 16px 16px; }
 @media (max-width: 900px) { main { grid-template-columns: 1fr; } }
-.card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; }
-#map { padding: 8px; position: relative; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 2px; }
+.ptitle { padding: 8px 10px 4px; font-size: 13px; font-weight: 500; color: var(--strong); }
+#map { position: relative; }
+#map svg { padding: 4px 8px 8px; }
 svg { width: 100%; height: auto; display: block; }
-.side { padding: 14px 16px; display: flex; flex-direction: column; gap: 12px; }
-.side h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); margin: 0; font-weight: 600; }
-.kpis { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-.kpi { border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; }
-.kpi .v { font-size: 20px; font-weight: 650; font-variant-numeric: tabular-nums; }
+.side { padding: 0 0 12px; display: flex; flex-direction: column; gap: 10px; }
+.side > div { padding: 0 12px; }
+.side .ptitle { padding: 8px 12px 0; }
+.side h2 { font-size: 12px; color: var(--muted); margin: 0 0 4px; font-weight: 500; }
+.kpis { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.kpi { background: #1f2227; border-radius: 2px; padding: 8px 10px; border-left: 3px solid var(--ok); }
+.kpi .v { font-size: 22px; font-weight: 500; color: var(--strong); font-variant-numeric: tabular-nums; }
 .kpi .l { font-size: 11px; color: var(--muted); }
-.kpi.bad { border-color: var(--bad); } .kpi.bad .v { color: var(--bad); }
-.kpi.warn .v { color: var(--warn); }
+.kpi.neutral { border-left-color: var(--grid); }
+.kpi.bad { border-left-color: var(--bad); } .kpi.bad .v { color: var(--bad); }
+.kpi.warn { border-left-color: var(--warn); } .kpi.warn .v { color: var(--warn); }
 ul.viol { margin: 0; padding-left: 18px; } ul.viol li { margin: 2px 0; }
-.ok-msg { color: var(--ok); font-weight: 600; }
-#tip { position: absolute; pointer-events: none; background: var(--ink); color: var(--bg); font-size: 12px; padding: 6px 8px; border-radius: 6px; display: none; white-space: nowrap; }
+.ok-msg { color: var(--ok); }
+#tip { position: absolute; pointer-events: none; background: #22252b; color: var(--strong); border: 1px solid var(--line); font-size: 12px; padding: 6px 8px; border-radius: 2px; display: none; white-space: nowrap; box-shadow: 0 4px 8px rgba(0,0,0,.4); }
 .legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 12px; color: var(--muted); }
 .sw { display: inline-block; width: 18px; height: 4px; border-radius: 2px; vertical-align: middle; margin-right: 4px; }
 .dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; vertical-align: middle; margin-right: 4px; }
-.note { font-size: 12px; color: var(--muted); }
+.note { font-size: 11px; color: var(--muted); }
 </style>
 </head>
 <body>
 <header>
-  <h1>Digital twin · LV feeder, 55 Austin homes</h1>
+  <h1>OpenAIFlex · Digital twin · LV feeder, 55 Austin homes</h1>
   <span class="sub" id="gridinfo">IEEE European LV feeder in TWIN-REV, power flow by DPsim</span>
 </header>
 <div class="controls">
@@ -77,9 +85,9 @@ ul.viol { margin: 0; padding-left: 18px; } ul.viol li { margin: 2px 0; }
 <div class="strip" id="strip"></div>
 <div class="legend-strip">Each box is one hour (Austin local time): green = every limit kept, amber = above 90 % of a limit, red = a limit broken. Click an hour or press play.</div>
 <main>
-  <div class="card" id="map"><svg id="svg"></svg><div id="tip"></div></div>
+  <div class="card" id="map"><div class="ptitle" id="maptitle">Feeder</div><svg id="svg"></svg><div id="tip"></div></div>
   <div class="card side">
-    <div><h2 id="hourtitle">Hour</h2></div>
+    <div class="ptitle" id="hourtitle">Hour</div>
     <div class="kpis" id="kpis"></div>
     <div><h2>Limits broken this hour</h2><div id="viol"></div></div>
     <div>
@@ -176,6 +184,7 @@ function paint() {
 function side() {
   const h = hour, lim = D.limits;
   $("#hourtitle").textContent = `${String(h).padStart(2, "0")}:00 – ${String(h + 1).padStart(2, "0")}:00 · ${D.day}`;
+  $("#maptitle").textContent = `Feeder state at ${String(h).padStart(2, "0")}:00 · ${D.day} · EV ${D.n_ev} / PV ${D.n_pv} homes`;
   let vmin = 9, vminN = "", vmax = 0, vmaxN = "", lmax = 0, lmaxN = "";
   for (const [n, v] of Object.entries(D.nodes)) { if (v[h] < vmin) { vmin = v[h]; vminN = n; } if (v[h] > vmax) { vmax = v[h]; vmaxN = n; } }
   for (const [n, l] of Object.entries(D.lines)) if (l.pct[h] > lmax) { lmax = l.pct[h]; lmaxN = n; }
@@ -183,12 +192,12 @@ function side() {
   const k = (v, l, cls) => `<div class="kpi ${cls}"><div class="v">${v}</div><div class="l">${l}</div></div>`;
   const c = (bad, warn) => bad ? "bad" : warn ? "warn" : "";
   $("#kpis").innerHTML =
-    k(`${D.net_kw[h].toFixed(0)} kW`, "substation net load", "") +
+    k(`${D.net_kw[h].toFixed(0)} kW`, "substation net load", "neutral") +
     k(`${t.toFixed(0)} %`, "transformer", c(t > 100, t >= 90)) +
     k(vmin.toFixed(3), `lowest voltage (pu) · ${vminN}`, c(vmin < lim.v_min_pu, vmin < lim.v_min_pu + 0.005)) +
     k(`${lmax.toFixed(0)} %`, `most loaded cable · ${lmaxN}`, c(lmax > 100, lmax >= 90)) +
     k(vmax.toFixed(3), `highest voltage (pu) · ${vmaxN}`, c(vmax > lim.v_max_pu, vmax > lim.v_max_pu - 0.005)) +
-    k(`${D.n_ev} / ${D.n_pv}`, "homes with EV / PV", "");
+    k(`${D.n_ev} / ${D.n_pv}`, "homes with EV / PV", "neutral");
   const v = [];
   if (t > 100) v.push(`Transformer ${t.toFixed(0)} % of 200 kVA`);
   const over = Object.entries(D.lines).filter(([, l]) => l.pct[h] > 100).sort((a, b) => b[1].pct[h] - a[1].pct[h]);
