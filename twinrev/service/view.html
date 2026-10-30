@@ -1,0 +1,271 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LV Feeder Twin</title>
+<style>
+:root {
+  --bg: #f6f7f9; --panel: #ffffff; --ink: #1c2330; --muted: #677285; --line: #d9dee6; --grid: #b8c0cc;
+  --ok: #2e9e5b; --warn: #d99a00; --bad: #d64545; --pv: #2f7fd1; --accent: #3d63dd;
+}
+@media (prefers-color-scheme: dark) {
+  :root { --bg: #111418; --panel: #191d23; --ink: #e6e9ee; --muted: #9aa4b2; --line: #2b313a; --grid: #4a525e;
+          --ok: #3fbf74; --warn: #f0b429; --bad: #f05d5d; --pv: #5aa2ee; --accent: #7b96ff; }
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 14px/1.4 system-ui, -apple-system, "Segoe UI", sans-serif; }
+header { padding: 14px 20px 10px; display: flex; flex-wrap: wrap; gap: 10px 24px; align-items: baseline; }
+h1 { font-size: 18px; margin: 0; font-weight: 650; }
+.sub { color: var(--muted); font-size: 13px; }
+.controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 0 20px 10px; }
+.controls label { color: var(--muted); font-size: 12px; display: flex; gap: 6px; align-items: center; }
+select, input, button { font: inherit; color: var(--ink); background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 5px 8px; }
+input[type=number] { width: 64px; }
+button { cursor: pointer; }
+button.preset.on { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+button.run { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
+#status { color: var(--muted); font-size: 12px; min-width: 160px; }
+.strip { display: grid; grid-template-columns: 40px repeat(24, 1fr); gap: 3px; padding: 0 20px 4px; align-items: center; }
+.strip button { padding: 0; height: 30px; border-radius: 4px; border: 2px solid transparent; font-size: 11px; color: #fff; font-weight: 600; }
+.strip button.sel { border-color: var(--ink); }
+.strip .play { background: var(--panel); color: var(--ink); border: 1px solid var(--line); font-size: 14px; }
+.legend-strip { padding: 0 20px 8px; color: var(--muted); font-size: 12px; }
+main { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 14px; padding: 0 20px 20px; }
+@media (max-width: 900px) { main { grid-template-columns: 1fr; } }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; }
+#map { padding: 8px; position: relative; }
+svg { width: 100%; height: auto; display: block; }
+.side { padding: 14px 16px; display: flex; flex-direction: column; gap: 12px; }
+.side h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); margin: 0; font-weight: 600; }
+.kpis { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.kpi { border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; }
+.kpi .v { font-size: 20px; font-weight: 650; font-variant-numeric: tabular-nums; }
+.kpi .l { font-size: 11px; color: var(--muted); }
+.kpi.bad { border-color: var(--bad); } .kpi.bad .v { color: var(--bad); }
+.kpi.warn .v { color: var(--warn); }
+ul.viol { margin: 0; padding-left: 18px; } ul.viol li { margin: 2px 0; }
+.ok-msg { color: var(--ok); font-weight: 600; }
+#tip { position: absolute; pointer-events: none; background: var(--ink); color: var(--bg); font-size: 12px; padding: 6px 8px; border-radius: 6px; display: none; white-space: nowrap; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 12px; color: var(--muted); }
+.sw { display: inline-block; width: 18px; height: 4px; border-radius: 2px; vertical-align: middle; margin-right: 4px; }
+.dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; vertical-align: middle; margin-right: 4px; }
+.note { font-size: 12px; color: var(--muted); }
+</style>
+</head>
+<body>
+<header>
+  <h1>Digital twin · LV feeder, 55 Austin homes</h1>
+  <span class="sub" id="gridinfo">IEEE European LV feeder in TWIN-REV, power flow by DPsim</span>
+</header>
+<div class="controls">
+  <label>Day
+    <select id="day"><option value="peak">Peak day</option><option value="pv">PV day (lowest net load)</option><option value="date">Date…</option></select>
+    <input type="date" id="date" min="2018-01-08" max="2018-12-24" value="2018-07-15" style="display:none">
+  </label>
+  <span class="sub">Scenario</span>
+  <button class="preset on" data-p="today">Today</button>
+  <button class="preset" data-p="ev_x2">2× EV</button>
+  <button class="preset" data-p="ev_all">EV in every home</button>
+  <button class="preset" data-p="pv_x2">2× PV</button>
+  <label>EV homes <input type="number" id="n_ev" min="0" max="55" placeholder="data"></label>
+  <label>PV homes <input type="number" id="n_pv" min="0" max="55" placeholder="data"></label>
+  <label>PV size × <input type="number" id="pv_scale" min="0" max="8" step="0.25" value="1"></label>
+  <button class="run" id="run">Run power flow</button>
+  <span id="status"></span>
+</div>
+<div class="strip" id="strip"></div>
+<div class="legend-strip">Each box is one hour (Austin local time): green = every limit kept, amber = above 90 % of a limit, red = a limit broken. Click an hour or press play.</div>
+<main>
+  <div class="card" id="map"><svg id="svg"></svg><div id="tip"></div></div>
+  <div class="card side">
+    <div><h2 id="hourtitle">Hour</h2></div>
+    <div class="kpis" id="kpis"></div>
+    <div><h2>Limits broken this hour</h2><div id="viol"></div></div>
+    <div>
+      <h2>Legend</h2>
+      <div class="legend" style="margin-top:6px">
+        <span><span class="sw" style="background:var(--ok)"></span>cable &lt; 90 %</span>
+        <span><span class="sw" style="background:var(--warn)"></span>90–100 %</span>
+        <span><span class="sw" style="background:var(--bad)"></span>&gt; 100 %</span>
+        <span><span class="dot" style="background:var(--ok)"></span>voltage in limits</span>
+        <span><span class="dot" style="background:var(--bad)"></span>out of limits</span>
+        <span><span class="dot" style="background:var(--pv)"></span>home exporting PV</span>
+      </div>
+      <p class="note">Thick lines: main cable (Al 185, 340 A); thin: branches (145 A). Homes are drawn by their net load. Transformer: the feeder's 200 kVA share. Limits: V 0.95–1.05 pu, 100 % of ratings. Balanced model, hourly data: the real network breaks earlier.</p>
+    </div>
+  </div>
+</main>
+<script>
+const $ = s => document.querySelector(s);
+const NS = "http://www.w3.org/2000/svg";
+let L = null, D = null, hour = 18, timer = null;
+const PRESETS = { today: {}, ev_x2: { ev: 2 }, ev_all: { n_ev: 55 }, pv_x2: { pv: 2 } };
+let preset = "today", site = null;
+
+const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+const colLoad = p => p > 100 ? css("--bad") : p >= 90 ? css("--warn") : css("--ok");
+function colV(v) {
+  const lo = D.limits.v_min_pu, hi = D.limits.v_max_pu;
+  if (v < lo || v > hi) return css("--bad");
+  if (v < lo + 0.005 || v > hi - 0.005) return css("--warn");
+  return css("--ok");
+}
+function el(tag, attrs, parent) { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); parent && parent.appendChild(e); return e; }
+
+function hourStatus(h) {
+  let worst = 0;   // 0 ok, 1 warn, 2 bad
+  const lim = D.limits;
+  for (const l of Object.values(D.lines)) worst = Math.max(worst, l.pct[h] > 100 ? 2 : l.pct[h] >= 90 ? 1 : 0);
+  const t = D.trafo.pct[h]; worst = Math.max(worst, t > 100 ? 2 : t >= 90 ? 1 : 0);
+  for (const v of Object.values(D.nodes)) worst = Math.max(worst, (v[h] < lim.v_min_pu || v[h] > lim.v_max_pu) ? 2 : (v[h] < lim.v_min_pu + 0.005 || v[h] > lim.v_max_pu - 0.005) ? 1 : 0);
+  return worst;
+}
+
+function drawBase() {
+  const svg = $("#svg"); svg.innerHTML = "";
+  const xs = [], ys = [];
+  for (const l of Object.values(L.lines)) for (const [x, y] of l.path) { xs.push(x); ys.push(y); }
+  for (const l of Object.values(L.loads)) { xs.push(l.pos[0]); ys.push(l.pos[1]); }
+  const x0 = Math.min(...xs) - 30, y0 = Math.min(...ys) - 30, w = Math.max(...xs) - x0 + 30, h = Math.max(...ys) - y0 + 20;
+  svg.setAttribute("viewBox", `${x0} ${y0} ${w} ${h}`);
+  const gl = el("g", {}, svg), gn = el("g", {}, svg), gh = el("g", {}, svg);
+  for (const [name, l] of Object.entries(L.lines)) {
+    const main = (site && site.cls[name] === "main");
+    const p = el("polyline", { points: l.path.map(q => q.join(",")).join(" "), fill: "none", "stroke-width": main ? 3.2 : 1.6,
+      "stroke-linecap": "round", "stroke-linejoin": "round", "data-k": "line", "data-n": name }, gl);
+    p.style.cursor = "pointer";
+  }
+  for (const [name, [x, y]] of Object.entries(L.nodes)) {
+    if (name === "N0") continue;
+    el("circle", { cx: x, cy: y, r: 2.1, "data-k": "node", "data-n": name }, gn);
+  }
+  for (const [lod, l] of Object.entries(L.loads)) {
+    const [x, y] = l.pos;
+    el("path", { d: `M${x - 4},${y + 3} L${x - 4},${y - 1} L${x},${y - 5} L${x + 4},${y - 1} L${x + 4},${y + 3} Z`, "data-k": "load", "data-n": lod,
+      stroke: css("--panel"), "stroke-width": 0.6 }, gh);
+  }
+  const t = L.trafo.pos;
+  const gt = el("g", { "data-k": "trafo", "data-n": "TR1" }, svg);
+  el("circle", { cx: t[0] - 4, cy: t[1], r: 7, fill: "none", "stroke-width": 2.2, class: "tr" }, gt);
+  el("circle", { cx: t[0] + 4, cy: t[1], r: 7, fill: "none", "stroke-width": 2.2, class: "tr" }, gt);
+  el("rect", { x: t[0] - 13, y: t[1] - 9, width: 26, height: 18, fill: "transparent" }, gt);
+  const lab = el("text", { x: t[0] + 14, y: t[1] - 8, "font-size": 9, fill: css("--muted") }, svg); lab.textContent = "200 kVA";
+  svg.addEventListener("mousemove", hover); svg.addEventListener("mouseleave", () => $("#tip").style.display = "none");
+}
+
+function paint() {
+  const h = hour;
+  document.querySelectorAll("[data-k=line]").forEach(p => {
+    const l = D.lines[p.dataset.n]; p.setAttribute("stroke", l ? colLoad(l.pct[h]) : css("--grid"));
+  });
+  document.querySelectorAll("[data-k=node]").forEach(c => {
+    const v = D.nodes[c.dataset.n]; c.setAttribute("fill", v ? colV(v[h]) : css("--grid"));
+  });
+  document.querySelectorAll("[data-k=load]").forEach(p => {
+    const kw = D.loads[p.dataset.n].kw[h];
+    p.setAttribute("fill", kw < 0 ? css("--pv") : css("--muted"));
+    p.setAttribute("opacity", Math.min(1, 0.35 + Math.abs(kw) / 6).toFixed(2));
+  });
+  const tc = colLoad(D.trafo.pct[h]);
+  document.querySelectorAll(".tr").forEach(c => c.setAttribute("stroke", tc));
+  document.querySelectorAll("#strip button[data-h]").forEach(b => b.classList.toggle("sel", +b.dataset.h === h));
+  side();
+}
+
+function side() {
+  const h = hour, lim = D.limits;
+  $("#hourtitle").textContent = `${String(h).padStart(2, "0")}:00 – ${String(h + 1).padStart(2, "0")}:00 · ${D.day}`;
+  let vmin = 9, vminN = "", vmax = 0, vmaxN = "", lmax = 0, lmaxN = "";
+  for (const [n, v] of Object.entries(D.nodes)) { if (v[h] < vmin) { vmin = v[h]; vminN = n; } if (v[h] > vmax) { vmax = v[h]; vmaxN = n; } }
+  for (const [n, l] of Object.entries(D.lines)) if (l.pct[h] > lmax) { lmax = l.pct[h]; lmaxN = n; }
+  const t = D.trafo.pct[h];
+  const k = (v, l, cls) => `<div class="kpi ${cls}"><div class="v">${v}</div><div class="l">${l}</div></div>`;
+  const c = (bad, warn) => bad ? "bad" : warn ? "warn" : "";
+  $("#kpis").innerHTML =
+    k(`${D.net_kw[h].toFixed(0)} kW`, "substation net load", "") +
+    k(`${t.toFixed(0)} %`, "transformer", c(t > 100, t >= 90)) +
+    k(vmin.toFixed(3), `lowest voltage (pu) · ${vminN}`, c(vmin < lim.v_min_pu, vmin < lim.v_min_pu + 0.005)) +
+    k(`${lmax.toFixed(0)} %`, `most loaded cable · ${lmaxN}`, c(lmax > 100, lmax >= 90)) +
+    k(vmax.toFixed(3), `highest voltage (pu) · ${vmaxN}`, c(vmax > lim.v_max_pu, vmax > lim.v_max_pu - 0.005)) +
+    k(`${D.n_ev} / ${D.n_pv}`, "homes with EV / PV", "");
+  const v = [];
+  if (t > 100) v.push(`Transformer ${t.toFixed(0)} % of 200 kVA`);
+  const over = Object.entries(D.lines).filter(([, l]) => l.pct[h] > 100).sort((a, b) => b[1].pct[h] - a[1].pct[h]);
+  if (over.length) v.push(`${over.length} cable section(s) over rating, worst ${over[0][0]} ${over[0][1].pct[h].toFixed(0)} % (${over[0][1].amps[h].toFixed(0)} A of ${over[0][1].rating_a} A)`);
+  const lo = Object.values(D.nodes).filter(x => x[h] < lim.v_min_pu).length, hi = Object.values(D.nodes).filter(x => x[h] > lim.v_max_pu).length;
+  if (lo) v.push(`${lo} node(s) below ${lim.v_min_pu} pu (lowest ${vmin.toFixed(3)})`);
+  if (hi) v.push(`${hi} node(s) above ${lim.v_max_pu} pu (highest ${vmax.toFixed(3)})`);
+  $("#viol").innerHTML = v.length ? `<ul class="viol">${v.map(x => `<li>${x}</li>`).join("")}</ul>` : `<span class="ok-msg">None: the grid holds this hour.</span>`;
+}
+
+function strip() {
+  const s = $("#strip"); s.innerHTML = "";
+  const play = document.createElement("button"); play.className = "play"; play.textContent = timer ? "❚❚" : "▶"; play.title = "Play the day";
+  play.onclick = () => { if (timer) { clearInterval(timer); timer = null; } else timer = setInterval(() => { hour = (hour + 1) % 24; paint(); }, 700); strip(); };
+  s.appendChild(play);
+  for (let h = 0; h < 24; h++) {
+    const b = document.createElement("button"); b.dataset.h = h; b.textContent = String(h).padStart(2, "0");
+    const st = hourStatus(h); b.style.background = [css("--ok"), css("--warn"), css("--bad")][st];
+    b.onclick = () => { hour = h; paint(); }; s.appendChild(b);
+  }
+  paint();
+}
+
+function hover(ev) {
+  const t = ev.target, k = t.dataset && t.dataset.k || (t.parentNode.dataset && t.parentNode.dataset.k), tip = $("#tip");
+  if (!k || !D) { tip.style.display = "none"; return; }
+  const n = t.dataset.n || t.parentNode.dataset.n, h = hour; let txt = "";
+  if (k === "line" && D.lines[n]) { const l = D.lines[n]; txt = `Cable ${n} (${site.cls[n]}): ${l.pct[h].toFixed(0)} % · ${l.amps[h].toFixed(0)} A of ${l.rating_a} A`; }
+  else if (k === "node" && D.nodes[n]) txt = `Node ${n}: ${D.nodes[n][h].toFixed(3)} pu (${(D.nodes[n][h] * 400).toFixed(0)} V)`;
+  else if (k === "load") { const l = D.loads[n]; txt = `${n} · home ${l.unit}: ${l.kw[h].toFixed(2)} kW`; }
+  else if (k === "trafo") txt = `Transformer TR1: ${D.trafo.pct[h].toFixed(0)} % of ${D.trafo.kva} kVA`;
+  if (!txt) { tip.style.display = "none"; return; }
+  const r = $("#map").getBoundingClientRect();
+  tip.textContent = txt; tip.style.display = "block";
+  tip.style.left = Math.min(ev.clientX - r.left + 12, r.width - tip.offsetWidth - 4) + "px"; tip.style.top = (ev.clientY - r.top + 12) + "px";
+}
+
+function body() {
+  const day = $("#day").value === "date" ? $("#date").value : $("#day").value;
+  const b = { day, pv_scale: +$("#pv_scale").value || 1 };
+  if ($("#n_ev").value !== "") b.n_ev = +$("#n_ev").value;
+  if ($("#n_pv").value !== "") b.n_pv = +$("#n_pv").value;
+  return b;
+}
+async function run() {
+  $("#status").textContent = "Running the power flow in TWIN-REV…"; $("#run").disabled = true;
+  try {
+    const r = await fetch("grid", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body()) });
+    const j = await r.json();
+    if (!r.ok) throw new Error(j.detail || r.statusText);
+    D = j;
+    const bad = [...Array(24).keys()].filter(h => hourStatus(h) === 2).length;
+    $("#status").textContent = bad ? `${bad} hour(s) with a broken limit` : "Every hour within limits";
+    if (bad && hourStatus(hour) !== 2) hour = [...Array(24).keys()].find(h => hourStatus(h) === 2);
+    strip();
+  } catch (e) { $("#status").textContent = "Error: " + e.message; }
+  $("#run").disabled = false;
+}
+function applyPreset(p) {
+  preset = p; document.querySelectorAll(".preset").forEach(b => b.classList.toggle("on", b.dataset.p === p));
+  const P = PRESETS[p], evs = site.ev_units, pvs = site.pv_units;
+  $("#n_ev").value = P.n_ev != null ? P.n_ev : P.ev ? Math.min(55, Math.round(P.ev * evs)) : "";
+  $("#n_pv").value = P.pv ? Math.min(55, Math.round(P.pv * pvs)) : "";
+  run();
+}
+document.querySelectorAll(".preset").forEach(b => b.onclick = () => applyPreset(b.dataset.p));
+$("#run").onclick = run;
+$("#day").onchange = () => { $("#date").style.display = $("#day").value === "date" ? "" : "none"; run(); };
+$("#date").onchange = run;
+(async () => {
+  const [lay, s] = await Promise.all([fetch("grid/layout").then(r => r.json()), fetch("site").then(r => r.json())]);
+  L = lay;
+  site = { cls: {}, ev_units: s.ev_homes.length / s.homes * 55, pv_units: s.pv_homes.length / s.homes * 55 };
+  try { const g = await fetch("grid/lines").then(r => r.json()); site.cls = g; } catch (e) {}
+  $("#gridinfo").textContent = `IEEE European LV feeder in TWIN-REV, power flow by DPsim · peak day ${s.days.peak}, PV day ${s.days.pv}` + (s.synthetic ? " · SYNTHETIC DATA" : "");
+  drawBase(); run();
+})();
+</script>
+</body>
+</html>

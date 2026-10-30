@@ -7,13 +7,14 @@ Outputs (InfluxDB, Grafana):  lv_scenario,site,day_type,scenario  vmin_pu, vmax_
 max_line_loading_pct, max_line_current_a, net_load_kw (24 h on 2030-01-01, local hours of the studied day);  lv_hosting,site  max_ev_homes,
 max_pv_homes (out of 55 units), max_pv_scale_all_homes.
 """
-import os, threading, traceback, uuid
+import json, os, threading, traceback, uuid
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
 from typing import List, Optional
 
 import pandas as pd
 from fastapi import FastAPI, HTTPException
+from fastapi.responses import HTMLResponse
 from pydantic import BaseModel, Field
 
 import grid as G
@@ -29,6 +30,9 @@ app = FastAPI(title="OpenAIFlex - TWIN-REV scenarios", version="0.1.0",
 _pool = ThreadPoolExecutor(max_workers=1)
 _jobs, _lock = {}, threading.Lock()
 _site = {}
+_twinrev_lock = threading.Lock()        # one write + power flow at a time: TWIN-REV's profile table is shared
+_grid_cache = {}
+HERE = os.path.dirname(os.path.abspath(__file__))
 
 
 class Scenario(BaseModel):
@@ -98,8 +102,9 @@ def _run(jid, req):
             runs["n"] += 1
             _set(jid, status=f"power flow {runs['n']} ({day.date()}, {sc.name})")
             P, Q, info = SC.scenario(S, day, sc.n_ev, sc.n_pv, sc.pv_scale, req.seed, req.n_units)
-            G.write_profiles(engine, G.profile_rows(P, Q, G.placement(list(P.columns))))
-            st = G.grid_state(G.run_pipeline(url))
+            with _twinrev_lock:
+                G.write_profiles(engine, G.profile_rows(P, Q, G.placement(list(P.columns))))
+                st = G.grid_state(G.run_pipeline(url))
             st["net_load_kw"] = P.sum(axis=1).values
             return st, info
 
@@ -178,6 +183,61 @@ def site_info():
                 units_on_peak_day={lod: u for u, lod in
                                    G.placement([u for u, _, _ in SC.units(S, S["days"]["peak"])]).items()},
                 synthetic=os.path.exists(os.path.join(DATA_DIR, "SYNTHETIC_NOT_REAL_DATA.txt")))
+
+
+class GridRequest(BaseModel):
+    day: str = Field("peak", description="'peak', 'pv' or a date YYYY-MM-DD (2018)")
+    n_ev: Optional[int] = Field(None, ge=0, description="homes with an EV; omit = as in the data")
+    n_pv: Optional[int] = Field(None, ge=0, description="homes with PV; omit = as in the data")
+    pv_scale: float = Field(1.0, ge=0)
+    seed: int = 0
+    v_min_pu: float = 0.95
+    v_max_pu: float = 1.05
+
+
+@app.post("/grid")
+def grid_day(req: GridRequest):
+    """One scenario, one day: the state of every node, cable and the transformer for each hour (network view)."""
+    key = req.model_dump_json()
+    if key in _grid_cache:
+        return _grid_cache[key]
+    try:
+        S = site()
+        day = S["days"][req.day] if req.day in S["days"] else pd.Timestamp(req.day, tz=SC.TZ)
+        P, Q, info = SC.scenario(S, day, req.n_ev, req.n_pv, req.pv_scale, req.seed)
+    except Exception as e:
+        raise HTTPException(400, f"{type(e).__name__}: {e}")
+    url, engine = _twinrev()
+    place = G.placement(list(P.columns))
+    try:
+        with _twinrev_lock:
+            G.write_profiles(engine, G.profile_rows(P, Q, place))
+            result = G.run_pipeline(url)
+    except Exception as e:
+        raise HTTPException(502, f"TWIN-REV power flow failed: {type(e).__name__}: {e}")
+    out = dict(request=req.model_dump(), **info, **G.grid_detail(result),
+               loads={lod: dict(unit=u, kw=[round(float(x), 2) for x in P[u].values]) for u, lod in place.items()},
+               net_kw=[round(float(x), 2) for x in P.sum(axis=1).values],
+               limits=dict(v_min_pu=req.v_min_pu, v_max_pu=req.v_max_pu, trafo_max_pct=100.0, line_max_pct=100.0))
+    if len(_grid_cache) > 50:
+        _grid_cache.clear()
+    _grid_cache[key] = out
+    return out
+
+
+@app.get("/grid/layout")
+def grid_layout():
+    return json.load(open(os.path.join(HERE, "lv_layout.json")))
+
+
+@app.get("/grid/lines")
+def grid_lines():
+    return {name: v["cls"] for name, v in G._LINES.items()}
+
+
+@app.get("/view", response_class=HTMLResponse)
+def view():
+    return open(os.path.join(HERE, "view.html"), encoding="utf-8").read()
 
 
 @app.post("/scenarios", status_code=202)

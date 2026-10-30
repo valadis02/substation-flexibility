@@ -115,3 +115,20 @@ def binding(state, lim):
             "overvoltage_h": int((state.vmax_pu > lim["v_max_pu"]).sum()),
             "transformer_h": int((state.trafo_loading_pct > lim["trafo_max_pct"]).sum()),
             "cable_h": int((state.max_line_loading_pct > lim["line_max_pct"]).sum())}
+
+
+def grid_detail(result):
+    """Per element and hour, for the network view: LV node voltages (pu), line loading (% of rating) and current (A),
+    transformer loading (%)."""
+    res = {k: np.asarray(v, dtype=float) for k, v in result.items() if isinstance(v, list) and k != "time"}
+    nodes = sorted(k[:-5] for k in res if k.endswith("_V.re"))
+    V = {n: np.hypot(res[f"{n}_V.re"], res[f"{n}_V.im"]) for n in nodes}
+    V = {n: v / LV_BASE_V for n, v in V.items() if v.mean() < 1000}
+    lines = sorted({k[:-7] for k in res if k.endswith("_I_0.re")} - {TRAFO})
+    I = {l: np.hypot(res[f"{l}_I_0.re"], res[f"{l}_I_0.im"]) for l in lines}
+    r4 = lambda a, d: [round(float(x), d) for x in a]
+    return dict(nodes={n: r4(v, 4) for n, v in V.items()},
+                lines={l: dict(pct=r4(100 * I[l] / LINE_RATING_A[l], 1), amps=r4(I[l], 1), rating_a=LINE_RATING_A[l])
+                       for l in lines},
+                trafo=dict(name=TRAFO, kva=TRAFO_KVA,
+                           pct=r4(100 * np.hypot(res[f"{TRAFO}_P_0"], res[f"{TRAFO}_Q_0"]) / 1000.0 / TRAFO_KVA, 1)))

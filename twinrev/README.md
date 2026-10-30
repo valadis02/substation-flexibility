@@ -122,6 +122,18 @@ curl -s localhost:8002/scenarios/<id>          # repeat until "status": "done"
 Grafana: Dashboards, then Import, then upload `service/grafana_scenarios.json`, then choose the InfluxDB data
 source. Pick the day (`peak` / `pv`) at the top.
 
+**5. Network view (the digital twin on a diagram).** Open http://localhost:8002/view (with the port-forward of
+step 3). It shows the single-line diagram of the feeder (positions from the CIM diagram layout), and for every hour:
+- cables coloured by loading (green < 90 %, amber 90-100 %, red over rating);
+- node voltages, coloured red when outside the limits;
+- homes drawn by their net load (blue = exporting PV);
+- the transformer.
+
+Choose the day (peak, PV or any date of 2018) and the scenario (today, 2x EV, EV in every home, 2x PV, or your own
+numbers), then press Run: one power flow in TWIN-REV, about 5-10 s. The strip of 24 hours shows which hours hold
+(green), are close (amber) or break (red); click an hour or press play. Behind it: `POST /grid` (state of every node,
+cable and the transformer per hour) and `GET /grid/layout`.
+
 ## Tests
 ```bash
 cd twinrev && python3 -m pytest -q tests      # scenario construction on synthetic data (no DPsim needed)
@@ -137,4 +149,6 @@ The full chain was tested on synthetic data:
 - `cim/make_lv_zip.py`: IEEE EU LV CIM to TWIN-REV cell-3 archive. Loads are renamed `lod_01..55`, because dpsv
   matches profiles by name prefix. Transformer share and main cable size are options.
 - `service/lv_lines.json`: cable class of each line, from the CIM (`--lines-json`), for the thermal ratings.
+- `service/lv_layout.json`, `cim/make_layout.py`: the diagram of the feeder (from the CIM diagram layout).
+- `service/view.html`: the network view (`GET /view`).
 - `tests/`: synthetic data generator and unit tests.
