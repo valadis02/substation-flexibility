@@ -1,4 +1,4 @@
-# Build from the twinrev/ folder:  docker build -f service/Dockerfile -t openaiflex/twinrev-scenarios:0.1 .
+# Build from the twinrev/ folder:  docker build -f service/Dockerfile -t openaiflex/twinrev-scenarios:0.4 .
 # No household data goes into the image: the Austin files are mounted at /data/austin (see k8s.yaml).
 FROM python:3.11-slim
 WORKDIR /app

@@ -1,4 +1,5 @@
-# TWIN-REV scenario service (namespace sogno). Apply with the folder of the processed Austin data filled in:
+# TWIN-REV scenario service (namespace sogno). Apply with the household data folder filled in: the processed Austin
+# data (local only), or the ready-made synthetic set $HOME/substation-flexibility/twinrev/data/synthetic_55:
 #   sed "s|__AUSTIN_DIR__|$HOME/substation-flexibility/flexibility/data/processed/pecan_austin|" service/k8s.yaml | kubectl apply -f -
 apiVersion: apps/v1
 kind: Deployment
@@ -11,7 +12,7 @@ spec:
     spec:
       containers:
       - name: api
-        image: openaiflex/twinrev-scenarios:0.1
+        image: openaiflex/twinrev-scenarios:0.4
         imagePullPolicy: Never          # image is imported into k3s locally, not pulled
         ports: [ { containerPort: 8000 } ]
         env:

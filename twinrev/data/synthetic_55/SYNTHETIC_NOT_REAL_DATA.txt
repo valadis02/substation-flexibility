@@ -1,0 +1,1 @@
+Synthetic stand-in: 55 invented homes (14 EV, 43 PV), seed 7, load_scale 0.495, pv_scale 0.55, temp_peak_hour 17, ev_prob 0.8, ev_hours (3, 7). Made by twinrev/tests/make_synthetic_austin.py. Not Pecan Street data.

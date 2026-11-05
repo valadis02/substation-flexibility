@@ -31,8 +31,10 @@ The CIM file has no current limits. The ratings are the HD 603 S1 values for XLP
 conductors). The published version is still available with `--trafo-kva 800 --main-r-ohm-km 0.249`, together with the
 env vars `TRAFO_KVA=800 MAIN_CABLE_A=272`.
 
-On the Austin data, the peak day (27 Aug 2018) with today's EVs is expected at about 98 % of the transformer and 84 % of the
-main cable. Doubling the EV homes takes the transformer over 100 % in the evening hours.
+Measured on the Austin data, peak day 27 Aug 2018:
+- **today's EVs (14 homes):** transformer 98 %, main cable 83 %, V min 0.954 pu; no hour over a limit.
+- **2x EV (26 homes):** transformer 105 %, over its limit for 3 evening hours.
+- **EV in every home:** transformer 128 %, V min 0.940 pu, main cable 108 %.
 
 Limitations:
 - The model is balanced (positive sequence), while the homes are single-phase. Real per-phase voltages are lower and
@@ -95,18 +97,24 @@ cd ~/substation-flexibility/flexibility
 python3 scripts/prepare_data.py pecan_austin /path/to/15minute_data_austin.csv
 # -> flexibility/data/processed/pecan_austin/  (git-ignored and docker-ignored)
 ```
-If the real file is not at hand, a **synthetic** stand-in in the same format lets you test the chain. Its numbers
-are invented, and `GET /site` then shows `"synthetic": true`.
-```bash
-python3 twinrev/tests/make_synthetic_austin.py ~/substation-flexibility/flexibility/data/processed/pecan_austin
-```
+**No Dataport access?** The repo has a ready-made **synthetic** set: `twinrev/data/synthetic_55`. It holds 55
+invented homes (14 with an EV, 43 with PV) in the same format, tuned so the feeder behaves like the real one:
+- peak day: about 177 kW net, transformer at 97 % today;
+- 2x EV (28 homes): over the limit for 3 evening hours;
+- an EV in every home: over it for 5 hours.
+
+Its numbers are invented, and `GET /site` and the view show it as synthetic. To use it, deploy with that folder in
+step 3: `DATA=$HOME/substation-flexibility/twinrev/data/synthetic_55`. The command that made it is in
+`tests/make_synthetic_austin.py`.
 
 **3. Build and deploy the service.**
 ```bash
 cd ~/substation-flexibility/twinrev
-sudo docker build -f service/Dockerfile -t openaiflex/twinrev-scenarios:0.1 .
-sudo docker save openaiflex/twinrev-scenarios:0.1 | sudo k3s ctr images import -
-sed "s|__AUSTIN_DIR__|$HOME/substation-flexibility/flexibility/data/processed/pecan_austin|" service/k8s.yaml | kubectl apply -f -
+sudo docker build -f service/Dockerfile -t openaiflex/twinrev-scenarios:0.4 .
+sudo docker save openaiflex/twinrev-scenarios:0.4 | sudo k3s ctr images import -
+DATA=$HOME/substation-flexibility/flexibility/data/processed/pecan_austin   # or .../twinrev/data/synthetic_55
+sed "s|__AUSTIN_DIR__|$DATA|" service/k8s.yaml | kubectl apply -f -
+kubectl -n sogno rollout restart deployment/twinrev-scenarios     # picks up a changed data folder
 kubectl -n sogno rollout status deployment/twinrev-scenarios
 kubectl -n sogno port-forward svc/twinrev-scenarios 8002:8000          # http://localhost:8002/docs
 ```
@@ -151,4 +159,5 @@ The full chain was tested on synthetic data:
 - `service/lv_lines.json`: cable class of each line, from the CIM (`--lines-json`), for the thermal ratings.
 - `service/lv_layout.json`, `cim/make_layout.py`: the diagram of the feeder (from the CIM diagram layout).
 - `service/view.html`: the network view (`GET /view`).
+- `data/synthetic_55/`: the ready-made synthetic set (55 invented homes).
 - `tests/`: synthetic data generator and unit tests.

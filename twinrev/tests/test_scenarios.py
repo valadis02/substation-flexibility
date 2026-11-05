@@ -66,3 +66,13 @@ def test_profile_rows_cover_every_load_point(S):
     assert len(lods_with_load) == 30
     total_mw = sum(r[5] for r in rows if r[4] == "active" and r[0].hour == 18)
     assert total_mw == pytest.approx(P.iloc[18].sum() / 1000.0)
+
+
+def test_ready_made_synthetic_set():
+    """twinrev/data/synthetic_55: 55 homes (one per load point, no copies), 14 EV, 43 PV, at the real feeder's level."""
+    S55 = SC.load_site(os.path.join(HERE, "..", "data", "synthetic_55"))
+    assert (len(S55["homes"]), len(S55["ev_homes"]), len(S55["pv_homes"])) == (55, 14, 43)
+    day = SC.extreme_days(S55)["peak"]
+    assert all(o == 0 for _, _, o in SC.units(S55, day))
+    P, Q, info = SC.scenario(S55, day)
+    assert 165 < info["peak_net_kw"] < 185
