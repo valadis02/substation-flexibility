@@ -1,0 +1,2070 @@
+{
+ "trafo_kva": 140.0,
+ "backend": "dpsim",
+ "homes": "dev",
+ "limits": {
+  "v_min": 0.95,
+  "v_max": 1.05,
+  "trafo": 100.0,
+  "line": 100.0
+ },
+ "scenarios": [
+  {
+   "day": "2018-07-29",
+   "seed": 0,
+   "participation": 0.25,
+   "alpha": 2,
+   "oracle": 14,
+   "method": 10,
+   "peaks_at_fix_pct": {
+    "none": 286.6,
+    "oracle": 221.2,
+    "method": 262.5
+   },
+   "peak_score": 0.369,
+   "score": 0.667,
+   "cases": {
+    "none": {
+     "capacity": 2,
+     "next_breaks": [
+      "transformer"
+     ],
+     "peak_at_fix_pct": 286.6,
+     "probes": {
+      "0": {
+       "trafo_max": 91.6,
+       "line_max": 54.4,
+       "vmin": 0.965
+      },
+      "1": {
+       "trafo_max": 91.6,
+       "line_max": 54.4,
+       "vmin": 0.965
+      },
+      "2": {
+       "trafo_max": 97.2,
+       "line_max": 57.8,
+       "vmin": 0.9638
+      },
+      "3": {
+       "trafo_max": 102.4,
+       "line_max": 60.9,
+       "vmin": 0.9626
+      },
+      "6": {
+       "trafo_max": 113.9,
+       "line_max": 67.7,
+       "vmin": 0.9594
+      },
+      "13": {
+       "trafo_max": 136.3,
+       "line_max": 81.0,
+       "vmin": 0.9528
+      },
+      "27": {
+       "trafo_max": 169.9,
+       "line_max": 101.0,
+       "vmin": 0.9379
+      },
+      "55": {
+       "trafo_max": 286.6,
+       "line_max": 170.3,
+       "vmin": 0.8884
+      }
+     }
+    },
+    "oracle": {
+     "capacity": 14,
+     "next_breaks": [
+      "transformer"
+     ],
+     "peak_at_fix_pct": 221.2,
+     "probes": {
+      "0": {
+       "trafo_max": 75.5,
+       "line_max": 44.9,
+       "vmin": 0.9693
+      },
+      "13": {
+       "trafo_max": 96.1,
+       "line_max": 57.1,
+       "vmin": 0.9647
+      },
+      "14": {
+       "trafo_max": 98.7,
+       "line_max": 58.6,
+       "vmin": 0.9641
+      },
+      "15": {
+       "trafo_max": 100.5,
+       "line_max": 59.8,
+       "vmin": 0.964
+      },
+      "16": {
+       "trafo_max": 101.9,
+       "line_max": 60.5,
+       "vmin": 0.964
+      },
+      "20": {
+       "trafo_max": 121.4,
+       "line_max": 72.2,
+       "vmin": 0.9548
+      },
+      "27": {
+       "trafo_max": 136.7,
+       "line_max": 81.3,
+       "vmin": 0.9486
+      },
+      "55": {
+       "trafo_max": 221.2,
+       "line_max": 131.5,
+       "vmin": 0.9145
+      }
+     }
+    },
+    "method": {
+     "capacity": 10,
+     "next_breaks": [
+      "transformer"
+     ],
+     "peak_at_fix_pct": 262.5,
+     "probes": {
+      "0": {
+       "requested_kwh": 20.7,
+       "delivered_kwh": 18.7,
+       "est_down_ev_kw_sum": 0.0,
+       "est_down_ne_kw_sum": 261.4,
+       "true_ev_kwh": 0.0,
+       "true_flex_kwh": 265.1,
+       "trafo_max": 77.5,
+       "line_max": 46.0,
+       "vmin": 0.9685
+      },
+      "6": {
+       "requested_kwh": 28.4,
+       "delivered_kwh": 28.4,
+       "est_down_ev_kw_sum": 3.6,
+       "est_down_ne_kw_sum": 282.8,
+       "true_ev_kwh": 98.4,
+       "true_flex_kwh": 265.1,
+       "trafo_max": 94.7,
+       "line_max": 56.3,
+       "vmin": 0.9656
+      },
+      "9": {
+       "requested_kwh": 33.0,
+       "delivered_kwh": 31.9,
+       "est_down_ev_kw_sum": 13.5,
+       "est_down_ne_kw_sum": 293.1,
+       "true_ev_kwh": 98.4,
+       "true_flex_kwh": 265.1,
+       "trafo_max": 99.6,
+       "line_max": 59.2,
+       "vmin": 0.9641
+      },
+      "10": {
+       "requested_kwh": 33.3,
+       "delivered_kwh": 32.0,
+       "est_down_ev_kw_sum": 16.9,
+       "est_down_ne_kw_sum": 296.1,
+       "true_ev_kwh": 98.4,
+       "true_flex_kwh": 265.1,
+       "trafo_max": 99.7,
+       "line_max": 59.3,
+       "vmin": 0.9641
+      },
+      "11": {
+       "requested_kwh": 31.9,
+       "delivered_kwh": 29.4,
+       "est_down_ev_kw_sum": 19.2,
+       "est_down_ne_kw_sum": 299.7,
+       "true_ev_kwh": 98.4,
+       "true_flex_kwh": 265.1,
+       "trafo_max": 105.4,
+       "line_max": 62.6,
+       "vmin": 0.9625
+      },
+      "13": {
+       "requested_kwh": 31.3,
+       "delivered_kwh": 31.3,
+       "est_down_ev_kw_sum": 19.2,
+       "est_down_ne_kw_sum": 303.0,
+       "true_ev_kwh": 168.0,
+       "true_flex_kwh": 265.1,
+       "trafo_max": 114.7,
+       "line_max": 68.2,
+       "vmin": 0.9597
+      },
+      "27": {
+       "requested_kwh": 43.8,
+       "delivered_kwh": 43.8,
+       "est_down_ev_kw_sum": 46.2,
+       "est_down_ne_kw_sum": 323.6,
+       "true_ev_kwh": 168.0,
+       "true_flex_kwh": 265.1,
+       "trafo_max": 156.1,
+       "line_max": 92.8,
+       "vmin": 0.9427
+      },
+      "55": {
+       "requested_kwh": 57.9,
+       "delivered_kwh": 54.4,
+       "est_down_ev_kw_sum": 78.7,
+       "est_down_ne_kw_sum": 358.0,
+       "true_ev_kwh": 375.3,
+       "true_flex_kwh": 265.1,
+       "trafo_max": 262.5,
+       "line_max": 156.0,
+       "vmin": 0.8983
+      }
+     }
+    }
+   }
+  },
+  {
+   "day": "2018-07-19",
+   "seed": 1,
+   "participation": 0.25,
+   "alpha": 3,
+   "oracle": 9,
+   "method": 6,
+   "peaks_at_fix_pct": {
+    "none": 240.0,
+    "oracle": 182.2,
+    "method": 208.8
+   },
+   "peak_score": 0.54,
+   "score": 0.5,
+   "cases": {
+    "none": {
+     "capacity": 3,
+     "next_breaks": [
+      "transformer"
+     ],
+     "peak_at_fix_pct": 240.0,
+     "probes": {
+      "0": {
+       "trafo_max": 83.0,
+       "line_max": 49.3,
+       "vmin": 0.9685
+      },
+      "3": {
+       "trafo_max": 99.6,
+       "line_max": 59.2,
+       "vmin": 0.964
+      },
+      "4": {
+       "trafo_max": 104.9,
+       "line_max": 62.3,
+       "vmin": 0.9625
+      },
+      "6": {
+       "trafo_max": 110.1,
+       "line_max": 65.5,
+       "vmin": 0.9611
+      },
+      "13": {
+       "trafo_max": 126.4,
+       "line_max": 75.1,
+       "vmin": 0.9573
+      },
+      "27": {
+       "trafo_max": 157.0,
+       "line_max": 93.3,
+       "vmin": 0.9426
+      },
+      "55": {
+       "trafo_max": 240.0,
+       "line_max": 142.6,
+       "vmin": 0.904
+      }
+     }
+    },
+    "oracle": {
+     "capacity": 9,
+     "next_breaks": [
+      "transformer"
+     ],
+     "peak_at_fix_pct": 182.2,
+     "probes": {
+      "0": {
+       "trafo_max": 69.7,
+       "line_max": 41.5,
+       "vmin": 0.9701
+      },
+      "6": {
+       "trafo_max": 88.0,
+       "line_max": 52.3,
+       "vmin": 0.966
+      },
+      "9": {
+       "trafo_max": 95.8,
+       "line_max": 57.0,
+       "vmin": 0.966
+      },
+      "10": {
+       "trafo_max": 101.5,
+       "line_max": 60.3,
+       "vmin": 0.9651
+      },
+      "11": {
+       "trafo_max": 101.5,
+       "line_max": 60.3,
+       "vmin": 0.9651
+      },
+      "13": {
+       "trafo_max": 104.1,
+       "line_max": 61.9,
+       "vmin": 0.9643
+      },
+      "27": {
+       "trafo_max": 130.1,
+       "line_max": 77.3,
+       "vmin": 0.9518
+      },
+      "55": {
+       "trafo_max": 182.2,
+       "line_max": 108.3,
+       "vmin": 0.9283
+      }
+     }
+    },
+    "method": {
+     "capacity": 6,
+     "next_breaks": [
+      "transformer"
+     ],
+     "peak_at_fix_pct": 208.8,
+     "probes": {
+      "0": {
+       "requested_kwh": 20.2,
+       "delivered_kwh": 18.8,
+       "est_down_ev_kw_sum": 0.0,
+       "est_down_ne_kw_sum": 251.0,
+       "true_ev_kwh": 0.0,
+       "true_flex_kwh": 252.1,
+       "trafo_max": 72.0,
+       "line_max": 42.8,
+       "vmin": 0.9703
+      },
+      "6": {
+       "requested_kwh": 18.2,
+       "delivered_kwh": 18.2,
+       "est_down_ev_kw_sum": 3.7,
+       "est_down_ne_kw_sum": 276.1,
+       "true_ev_kwh": 43.2,
+       "true_flex_kwh": 252.1,
+       "trafo_max": 95.5,
+       "line_max": 56.8,
+       "vmin": 0.9668
+      },
+      "7": {
+       "requested_kwh": 18.9,
+       "delivered_kwh": 16.8,
+       "est_down_ev_kw_sum": 7.2,
+       "est_down_ne_kw_sum": 279.2,
+       "true_ev_kwh": 43.2,
+       "true_flex_kwh": 252.1,
+       "trafo_max": 101.8,
+       "line_max": 60.5,
+       "vmin": 0.9654
+      },
+      "9": {
+       "requested_kwh": 19.4,
+       "delivered_kwh": 17.0,
+       "est_down_ev_kw_sum": 7.2,
+       "est_down_ne_kw_sum": 285.2,
+       "true_ev_kwh": 43.2,
+       "true_flex_kwh": 252.1,
+       "trafo_max": 104.3,
+       "line_max": 62.0,
+       "vmin": 0.9649
+      },
+      "13": {
+       "requested_kwh": 20.9,
+       "delivered_kwh": 20.9,
+       "est_down_ev_kw_sum": 15.6,
+       "est_down_ne_kw_sum": 294.9,
+       "true_ev_kwh": 69.6,
+       "true_flex_kwh": 252.1,
+       "trafo_max": 109.5,
+       "line_max": 65.1,
+       "vmin": 0.9631
+      },
+      "27": {
+       "requested_kwh": 37.5,
+       "delivered_kwh": 33.9,
+       "est_down_ev_kw_sum": 35.1,
+       "est_down_ne_kw_sum": 332.3,
+       "true_ev_kwh": 145.2,
+       "true_flex_kwh": 252.1,
+       "trafo_max": 138.4,
+       "line_max": 82.2,
+       "vmin": 0.95
+      },
+      "55": {
+       "requested_kwh": 49.1,
+       "delivered_kwh": 49.1,
+       "est_down_ev_kw_sum": 72.3,
+       "est_down_ne_kw_sum": 371.7,
+       "true_ev_kwh": 307.5,
+       "true_flex_kwh": 252.1,
+       "trafo_max": 208.8,
+       "line_max": 124.1,
+       "vmin": 0.9163
+      }
+     }
+    }
+   }
+  },
+  {
+   "day": "2018-08-08",
+   "seed": 2,
+   "participation": 0.25,
+   "alpha": 4,
+   "oracle": 9,
+   "method": 8,
+   "peaks_at_fix_pct": {
+    "none": 261.8,
+    "oracle": 198.3,
+    "method": 235.1
+   },
+   "peak_score": 0.42,
+   "score": 0.8,
+   "cases": {
+    "none": {
+     "capacity": 4,
+     "next_breaks": [
+      "transformer"
+     ],
+     "peak_at_fix_pct": 261.8,
+     "probes": {
+      "0": {
+       "trafo_max": 80.0,
+       "line_max": 47.5,
+       "vmin": 0.9699
+      },
+      "3": {
+       "trafo_max": 96.0,
+       "line_max": 57.1,
+       "vmin": 0.9661
+      },
+      "4": {
+       "trafo_max": 96.0,
+       "line_max": 57.1,
+       "vmin": 0.9661
+      },
+      "5": {
+       "trafo_max": 101.3,
+       "line_max": 60.2,
+       "vmin": 0.9646
+      },
+      "6": {
+       "trafo_max": 103.9,
+       "line_max": 61.8,
+       "vmin": 0.9638
+      },
+      "13": {
+       "trafo_max": 122.9,
+       "line_max": 73.0,
+       "vmin": 0.9585
+      },
+      "27": {
+       "trafo_max": 170.6,
+       "line_max": 101.4,
+       "vmin": 0.9375
+      },
+      "55": {
+       "trafo_max": 261.8,
+       "line_max": 155.6,
+       "vmin": 0.8976
+      }
+     }
+    },
+    "oracle": {
+     "capacity": 9,
+     "next_breaks": [
+      "transformer"
+     ],
+     "peak_at_fix_pct": 198.3,
+     "probes": {
+      "0": {
+       "trafo_max": 69.3,
+       "line_max": 41.2,
+       "vmin": 0.9719
+      },
+      "6": {
+       "trafo_max": 92.6,
+       "line_max": 55.0,
+       "vmin": 0.9663
+      },
+      "9": {
+       "trafo_max": 98.7,
+       "line_max": 58.6,
+       "vmin": 0.9644
+      },
+      "10": {
+       "trafo_max": 103.9,
+       "line_max": 61.7,
+       "vmin": 0.9632
+      },
+      "11": {
+       "trafo_max": 103.9,
+       "line_max": 61.7,
+       "vmin": 0.9632
+      },
+      "13": {
+       "trafo_max": 103.9,
+       "line_max": 61.7,
+       "vmin": 0.9632
+      },
+      "27": {
+       "trafo_max": 144.0,
+       "line_max": 85.6,
+       "vmin": 0.947
+      },
+      "55": {
+       "trafo_max": 198.3,
+       "line_max": 117.8,
+       "vmin": 0.9234
+      }
+     }
+    },
+    "method": {
+     "capacity": 8,
+     "next_breaks": [
+      "transformer"
+     ],
+     "peak_at_fix_pct": 235.1,
+     "probes": {
+      "0": {
+       "requested_kwh": 24.9,
+       "delivered_kwh": 23.2,
+       "est_down_ev_kw_sum": 0.0,
+       "est_down_ne_kw_sum": 267.3,
+       "true_ev_kwh": 0.0,
+       "true_flex_kwh": 239.3,
+       "trafo_max": 69.1,
+       "line_max": 41.0,
+       "vmin": 0.972
+      },
+      "6": {
+       "requested_kwh": 26.5,
+       "delivered_kwh": 22.9,
+       "est_down_ev_kw_sum": 5.1,
+       "est_down_ne_kw_sum": 286.1,
+       "true_ev_kwh": 0.0,
+       "true_flex_kwh": 239.3,
+       "trafo_max": 93.9,
+       "line_max": 55.8,
+       "vmin": 0.9665
+      },
+      "7": {
+       "requested_kwh": 27.6,
+       "delivered_kwh": 26.6,
+       "est_down_ev_kw_sum": 9.0,
+       "est_down_ne_kw_sum": 290.0,
+       "true_ev_kwh": 9.9,
+       "true_flex_kwh": 239.3,
+       "trafo_max": 94.1,
+       "line_max": 55.9,
+       "vmin": 0.9658
+      },
+      "8": {
+       "requested_kwh": 28.9,
+       "delivered_kwh": 27.7,
+       "est_down_ev_kw_sum": 12.2,
+       "est_down_ne_kw_sum": 293.1,
+       "true_ev_kwh": 9.9,
+       "true_flex_kwh": 239.3,
+       "trafo_max": 99.4,
+       "line_max": 59.1,
+       "vmin": 0.9642
+      },
+      "9": {
+       "requested_kwh": 30.0,
+       "delivered_kwh": 30.0,
+       "est_down_ev_kw_sum": 14.9,
+       "est_down_ne_kw_sum": 297.0,
+       "true_ev_kwh": 42.9,
+       "true_flex_kwh": 239.3,
+       "trafo_max": 104.2,
+       "line_max": 61.9,
+       "vmin": 0.963
+      },
+      "13": {
+       "requested_kwh": 31.4,
+       "delivered_kwh": 28.1,
+       "est_down_ev_kw_sum": 22.2,
+       "est_down_ne_kw_sum": 303.6,
+       "true_ev_kwh": 42.9,
+       "true_flex_kwh": 239.3,
+       "trafo_max": 110.6,
+       "line_max": 65.7,
+       "vmin": 0.962
+      },
+      "27": {
+       "requested_kwh": 40.1,
+       "delivered_kwh": 40.1,
+       "est_down_ev_kw_sum": 44.2,
+       "est_down_ne_kw_sum": 351.1,
+       "true_ev_kwh": 71.7,
+       "true_flex_kwh": 239.3,
+       "trafo_max": 151.3,
+       "line_max": 89.9,
+       "vmin": 0.9443
+      },
+      "55": {
+       "requested_kwh": 48.9,
+       "delivered_kwh": 48.9,
+       "est_down_ev_kw_sum": 74.5,
+       "est_down_ne_kw_sum": 363.0,
+       "true_ev_kwh": 279.0,
+       "true_flex_kwh": 239.3,
+       "trafo_max": 235.1,
+       "line_max": 139.7,
+       "vmin": 0.9082
+      }
+     }
+    }
+   }
+  },
+  {
+   "day": "2018-08-23",
+   "seed": 3,
+   "participation": 0.25,
+   "alpha": 3,
+   "oracle": 13,
+   "method": 11,
+   "peaks_at_fix_pct": {
+    "none": 234.3,
+    "oracle": 171.0,
+    "method": 203.1
+   },
+   "peak_score": 0.493,
+   "score": 0.8,
+   "cases": {
+    "none": {
+     "capacity": 3,
+     "next_breaks": [
+      "transformer"
+     ],
+     "peak_at_fix_pct": 234.3,
+     "probes": {
+      "0": {
+       "trafo_max": 88.6,
+       "line_max": 52.6,
+       "vmin": 0.966
+      },
+      "3": {
+       "trafo_max": 99.1,
+       "line_max": 58.9,
+       "vmin": 0.9629
+      },
+      "4": {
+       "trafo_max": 104.3,
+       "line_max": 62.0,
+       "vmin": 0.9618
+      },
+      "6": {
+       "trafo_max": 106.9,
+       "line_max": 63.5,
+       "vmin": 0.961
+      },
+      "13": {
+       "trafo_max": 122.8,
+       "line_max": 73.0,
+       "vmin": 0.9567
+      },
+      "27": {
+       "trafo_max": 156.7,
+       "line_max": 93.2,
+       "vmin": 0.9406
+      },
+      "55": {
+       "trafo_max": 234.3,
+       "line_max": 139.3,
+       "vmin": 0.9074
+      }
+     }
+    },
+    "oracle": {
+     "capacity": 13,
+     "next_breaks": [
+      "transformer"
+     ],
+     "peak_at_fix_pct": 171.0,
+     "probes": {
+      "0": {
+       "trafo_max": 71.8,
+       "line_max": 42.7,
+       "vmin": 0.9721
+      },
+      "13": {
+       "trafo_max": 99.9,
+       "line_max": 59.4,
+       "vmin": 0.9643
+      },
+      "14": {
+       "trafo_max": 105.2,
+       "line_max": 62.5,
+       "vmin": 0.9628
+      },
+      "16": {
+       "trafo_max": 105.2,
+       "line_max": 62.5,
+       "vmin": 0.9628
+      },
+      "20": {
+       "trafo_max": 113.7,
+       "line_max": 67.6,
+       "vmin": 0.959
+      },
+      "27": {
+       "trafo_max": 133.3,
+       "line_max": 79.2,
+       "vmin": 0.9479
+      },
+      "55": {
+       "trafo_max": 171.0,
+       "line_max": 101.7,
+       "vmin": 0.9289
+      }
+     }
+    },
+    "method": {
+     "capacity": 11,
+     "next_breaks": [
+      "transformer"
+     ],
+     "peak_at_fix_pct": 203.1,
+     "probes": {
+      "0": {
+       "requested_kwh": 20.3,
+       "delivered_kwh": 18.6,
+       "est_down_ev_kw_sum": 0.0,
+       "est_down_ne_kw_sum": 256.7,
+       "true_ev_kwh": 0.0,
+       "true_flex_kwh": 203.4,
+       "trafo_max": 73.8,
+       "line_max": 43.8,
+       "vmin": 0.9714
+      },
+      "6": {
+       "requested_kwh": 22.2,
+       "delivered_kwh": 22.2,
+       "est_down_ev_kw_sum": 8.7,
+       "est_down_ne_kw_sum": 273.2,
+       "true_ev_kwh": 75.6,
+       "true_flex_kwh": 203.4,
+       "trafo_max": 89.2,
+       "line_max": 53.0,
+       "vmin": 0.967
+      },
+      "9": {
+       "requested_kwh": 23.3,
+       "delivered_kwh": 23.3,
+       "est_down_ev_kw_sum": 12.2,
+       "est_down_ne_kw_sum": 280.9,
+       "true_ev_kwh": 75.6,
+       "true_flex_kwh": 203.4,
+       "trafo_max": 93.6,
+       "line_max": 55.6,
+       "vmin": 0.9659
+      },
+      "11": {
+       "requested_kwh": 24.1,
+       "delivered_kwh": 24.1,
+       "est_down_ev_kw_sum": 17.4,
+       "est_down_ne_kw_sum": 283.9,
+       "true_ev_kwh": 75.6,
+       "true_flex_kwh": 203.4,
+       "trafo_max": 98.2,
+       "line_max": 58.3,
+       "vmin": 0.9646
+      },
+      "12": {
+       "requested_kwh": 25.0,
+       "delivered_kwh": 25.0,
+       "est_down_ev_kw_sum": 17.4,
+       "est_down_ne_kw_sum": 288.8,
+       "true_ev_kwh": 75.6,
+       "true_flex_kwh": 203.4,
+       "trafo_max": 102.6,
+       "line_max": 61.0,
+       "vmin": 0.9637
+      },
+      "13": {
+       "requested_kwh": 24.6,
+       "delivered_kwh": 24.6,
+       "est_down_ev_kw_sum": 17.4,
+       "est_down_ne_kw_sum": 287.2,
+       "true_ev_kwh": 75.6,
+       "true_flex_kwh": 203.4,
+       "trafo_max": 102.9,
+       "line_max": 61.2,
+       "vmin": 0.9636
+      },
+      "27": {
+       "requested_kwh": 28.1,
+       "delivered_kwh": 28.1,
+       "est_down_ev_kw_sum": 35.3,
+       "est_down_ne_kw_sum": 311.7,
+       "true_ev_kwh": 75.6,
+       "true_flex_kwh": 203.4,
+       "trafo_max": 133.6,
+       "line_max": 79.4,
+       "vmin": 0.9486
+      },
+      "55": {
+       "requested_kwh": 55.9,
+       "delivered_kwh": 55.9,
+       "est_down_ev_kw_sum": 75.2,
+       "est_down_ne_kw_sum": 342.7,
+       "true_ev_kwh": 323.4,
+       "true_flex_kwh": 203.4,
+       "trafo_max": 203.1,
+       "line_max": 120.7,
+       "vmin": 0.917
+      }
+     }
+    }
+   }
+  },
+  {
+   "day": "2018-07-30",
+   "seed": 4,
+   "participation": 0.25,
+   "alpha": 5,
+   "oracle": 16,
+   "method": 13,
+   "peaks_at_fix_pct": {
+    "none": 243.3,
+    "oracle": 200.9,
+    "method": 223.3
+   },
+   "peak_score": 0.472,
+   "score": 0.727,
+   "cases": {
+    "none": {
+     "capacity": 5,
+     "next_breaks": [
+      "transformer"
+     ],
+     "peak_at_fix_pct": 243.3,
+     "probes": {
+      "0": {
+       "trafo_max": 84.4,
+       "line_max": 50.2,
+       "vmin": 0.968
+      },
+      "3": {
+       "trafo_max": 92.3,
+       "line_max": 54.8,
+       "vmin": 0.9657
+      },
+      "4": {
+       "trafo_max": 94.9,
+       "line_max": 56.4,
+       "vmin": 0.9651
+      },
+      "5": {
+       "trafo_max": 94.9,
+       "line_max": 56.4,
+       "vmin": 0.9651
+      },
+      "6": {
+       "trafo_max": 100.1,
+       "line_max": 59.5,
+       "vmin": 0.9636
+      },
+      "13": {
+       "trafo_max": 119.5,
+       "line_max": 71.0,
+       "vmin": 0.9584
+      },
+      "27": {
+       "trafo_max": 158.3,
+       "line_max": 94.1,
+       "vmin": 0.944
+      },
+      "55": {
+       "trafo_max": 243.3,
+       "line_max": 144.6,
+       "vmin": 0.9021
+      }
+     }
+    },
+    "oracle": {
+     "capacity": 16,
+     "next_breaks": [
+      "transformer"
+     ],
+     "peak_at_fix_pct": 200.9,
+     "probes": {
+      "0": {
+       "trafo_max": 70.4,
+       "line_max": 41.8,
+       "vmin": 0.9723
+      },
+      "13": {
+       "trafo_max": 94.6,
+       "line_max": 56.3,
+       "vmin": 0.9665
+      },
+      "16": {
+       "trafo_max": 99.9,
+       "line_max": 59.4,
+       "vmin": 0.965
+      },
+      "17": {
+       "trafo_max": 102.6,
+       "line_max": 61.0,
+       "vmin": 0.964
+      },
+      "18": {
+       "trafo_max": 107.9,
+       "line_max": 64.1,
+       "vmin": 0.962
+      },
+      "20": {
+       "trafo_max": 108.0,
+       "line_max": 64.2,
+       "vmin": 0.9615
+      },
+      "27": {
+       "trafo_max": 127.4,
+       "line_max": 75.7,
+       "vmin": 0.9522
+      },
+      "55": {
+       "trafo_max": 200.9,
+       "line_max": 119.4,
+       "vmin": 0.9193
+      }
+     }
+    },
+    "method": {
+     "capacity": 13,
+     "next_breaks": [
+      "transformer"
+     ],
+     "peak_at_fix_pct": 223.3,
+     "probes": {
+      "0": {
+       "requested_kwh": 26.5,
+       "delivered_kwh": 23.5,
+       "est_down_ev_kw_sum": 0.0,
+       "est_down_ne_kw_sum": 262.4,
+       "true_ev_kwh": 0.0,
+       "true_flex_kwh": 248.8,
+       "trafo_max": 70.8,
+       "line_max": 42.1,
+       "vmin": 0.9723
+      },
+      "13": {
+       "requested_kwh": 27.9,
+       "delivered_kwh": 27.9,
+       "est_down_ev_kw_sum": 15.5,
+       "est_down_ne_kw_sum": 306.7,
+       "true_ev_kwh": 69.3,
+       "true_flex_kwh": 248.8,
+       "trafo_max": 97.1,
+       "line_max": 57.7,
+       "vmin": 0.9663
+      },
+      "14": {
+       "requested_kwh": 28.6,
+       "delivered_kwh": 28.1,
+       "est_down_ev_kw_sum": 18.5,
+       "est_down_ne_kw_sum": 308.8,
+       "true_ev_kwh": 69.3,
+       "true_flex_kwh": 248.8,
+       "trafo_max": 102.3,
+       "line_max": 60.8,
+       "vmin": 0.9648
+      },
+      "16": {
+       "requested_kwh": 28.5,
+       "delivered_kwh": 26.4,
+       "est_down_ev_kw_sum": 21.0,
+       "est_down_ne_kw_sum": 308.0,
+       "true_ev_kwh": 69.3,
+       "true_flex_kwh": 248.8,
+       "trafo_max": 103.6,
+       "line_max": 61.6,
+       "vmin": 0.9642
+      },
+      "20": {
+       "requested_kwh": 35.1,
+       "delivered_kwh": 27.3,
+       "est_down_ev_kw_sum": 27.0,
+       "est_down_ne_kw_sum": 324.4,
+       "true_ev_kwh": 69.3,
+       "true_flex_kwh": 248.8,
+       "trafo_max": 115.2,
+       "line_max": 68.5,
+       "vmin": 0.9599
+      },
+      "27": {
+       "requested_kwh": 38.3,
+       "delivered_kwh": 38.3,
+       "est_down_ev_kw_sum": 32.7,
+       "est_down_ne_kw_sum": 331.8,
+       "true_ev_kwh": 95.7,
+       "true_flex_kwh": 248.8,
+       "trafo_max": 135.4,
+       "line_max": 80.5,
+       "vmin": 0.9503
+      },
+      "55": {
+       "requested_kwh": 44.0,
+       "delivered_kwh": 44.0,
+       "est_down_ev_kw_sum": 59.8,
+       "est_down_ne_kw_sum": 355.0,
+       "true_ev_kwh": 228.0,
+       "true_flex_kwh": 248.8,
+       "trafo_max": 223.3,
+       "line_max": 132.7,
+       "vmin": 0.91
+      }
+     }
+    }
+   }
+  },
+  {
+   "day": "2018-07-28",
+   "seed": 5,
+   "participation": 0.25,
+   "alpha": 6,
+   "oracle": 23,
+   "method": 11,
+   "peaks_at_fix_pct": {
+    "none": 223.5,
+    "oracle": 173.3,
+    "method": 200.1
+   },
+   "peak_score": 0.466,
+   "score": 0.294,
+   "cases": {
+    "none": {
+     "capacity": 6,
+     "next_breaks": [
+      "transformer"
+     ],
+     "peak_at_fix_pct": 223.5,
+     "probes": {
+      "0": {
+       "trafo_max": 77.8,
+       "line_max": 46.3,
+       "vmin": 0.9691
+      },
+      "6": {
+       "trafo_max": 97.1,
+       "line_max": 57.7,
+       "vmin": 0.9653
+      },
+      "7": {
+       "trafo_max": 102.3,
+       "line_max": 60.8,
+       "vmin": 0.9642
+      },
+      "9": {
+       "trafo_max": 110.7,
+       "line_max": 65.8,
+       "vmin": 0.9619
+      },
+      "13": {
+       "trafo_max": 123.9,
+       "line_max": 73.6,
+       "vmin": 0.9584
+      },
+      "27": {
+       "trafo_max": 155.4,
+       "line_max": 92.3,
+       "vmin": 0.9445
+      },
+      "55": {
+       "trafo_max": 223.5,
+       "line_max": 132.8,
+       "vmin": 0.9135
+      }
+     }
+    },
+    "oracle": {
+     "capacity": 23,
+     "next_breaks": [
+      "transformer"
+     ],
+     "peak_at_fix_pct": 173.3,
+     "probes": {
+      "0": {
+       "trafo_max": 67.7,
+       "line_max": 40.3,
+       "vmin": 0.9731
+      },
+      "13": {
+       "trafo_max": 96.7,
+       "line_max": 57.4,
+       "vmin": 0.9643
+      },
+      "20": {
+       "trafo_max": 99.8,
+       "line_max": 59.3,
+       "vmin": 0.9615
+      },
+      "23": {
+       "trafo_max": 99.8,
+       "line_max": 59.3,
+       "vmin": 0.9615
+      },
+      "24": {
+       "trafo_max": 105.1,
+       "line_max": 62.5,
+       "vmin": 0.9592
+      },
+      "25": {
+       "trafo_max": 111.0,
+       "line_max": 66.0,
+       "vmin": 0.956
+      },
+      "27": {
+       "trafo_max": 116.9,
+       "line_max": 69.5,
+       "vmin": 0.9538
+      },
+      "55": {
+       "trafo_max": 173.3,
+       "line_max": 103.0,
+       "vmin": 0.9295
+      }
+     }
+    },
+    "method": {
+     "capacity": 11,
+     "next_breaks": [
+      "transformer"
+     ],
+     "peak_at_fix_pct": 200.1,
+     "probes": {
+      "0": {
+       "requested_kwh": 26.8,
+       "delivered_kwh": 23.9,
+       "est_down_ev_kw_sum": 0.0,
+       "est_down_ne_kw_sum": 260.7,
+       "true_ev_kwh": 0.0,
+       "true_flex_kwh": 231.2,
+       "trafo_max": 68.8,
+       "line_max": 40.9,
+       "vmin": 0.9727
+      },
+      "6": {
+       "requested_kwh": 29.0,
+       "delivered_kwh": 29.0,
+       "est_down_ev_kw_sum": 5.9,
+       "est_down_ne_kw_sum": 284.2,
+       "true_ev_kwh": 75.6,
+       "true_flex_kwh": 231.2,
+       "trafo_max": 81.7,
+       "line_max": 48.6,
+       "vmin": 0.9691
+      },
+      "9": {
+       "requested_kwh": 30.8,
+       "delivered_kwh": 27.6,
+       "est_down_ev_kw_sum": 9.4,
+       "est_down_ne_kw_sum": 295.2,
+       "true_ev_kwh": 95.4,
+       "true_flex_kwh": 231.2,
+       "trafo_max": 93.0,
+       "line_max": 55.3,
+       "vmin": 0.9664
+      },
+      "11": {
+       "requested_kwh": 27.4,
+       "delivered_kwh": 27.4,
+       "est_down_ev_kw_sum": 12.7,
+       "est_down_ne_kw_sum": 298.1,
+       "true_ev_kwh": 95.4,
+       "true_flex_kwh": 231.2,
+       "trafo_max": 98.3,
+       "line_max": 58.4,
+       "vmin": 0.9641
+      },
+      "12": {
+       "requested_kwh": 27.7,
+       "delivered_kwh": 27.7,
+       "est_down_ev_kw_sum": 12.7,
+       "est_down_ne_kw_sum": 300.6,
+       "true_ev_kwh": 95.4,
+       "true_flex_kwh": 231.2,
+       "trafo_max": 103.4,
+       "line_max": 61.5,
+       "vmin": 0.9626
+      },
+      "13": {
+       "requested_kwh": 29.3,
+       "delivered_kwh": 29.3,
+       "est_down_ev_kw_sum": 16.3,
+       "est_down_ne_kw_sum": 302.9,
+       "true_ev_kwh": 95.4,
+       "true_flex_kwh": 231.2,
+       "trafo_max": 102.8,
+       "line_max": 61.1,
+       "vmin": 0.9628
+      },
+      "27": {
+       "requested_kwh": 45.6,
+       "delivered_kwh": 45.6,
+       "est_down_ev_kw_sum": 32.0,
+       "est_down_ne_kw_sum": 325.9,
+       "true_ev_kwh": 252.6,
+       "true_flex_kwh": 231.2,
+       "trafo_max": 137.4,
+       "line_max": 81.7,
+       "vmin": 0.9464
+      },
+      "55": {
+       "requested_kwh": 63.5,
+       "delivered_kwh": 63.5,
+       "est_down_ev_kw_sum": 78.7,
+       "est_down_ne_kw_sum": 371.6,
+       "true_ev_kwh": 328.2,
+       "true_flex_kwh": 231.2,
+       "trafo_max": 200.1,
+       "line_max": 118.9,
+       "vmin": 0.9219
+      }
+     }
+    }
+   }
+  },
+  {
+   "day": "2018-08-02",
+   "seed": 6,
+   "participation": 0.25,
+   "alpha": 3,
+   "oracle": 18,
+   "method": 8,
+   "peaks_at_fix_pct": {
+    "none": 253.4,
+    "oracle": 193.9,
+    "method": 220.2
+   },
+   "peak_score": 0.558,
+   "score": 0.333,
+   "cases": {
+    "none": {
+     "capacity": 3,
+     "next_breaks": [
+      "transformer"
+     ],
+     "peak_at_fix_pct": 253.4,
+     "probes": {
+      "0": {
+       "trafo_max": 93.4,
+       "line_max": 55.5,
+       "vmin": 0.9643
+      },
+      "3": {
+       "trafo_max": 99.1,
+       "line_max": 58.9,
+       "vmin": 0.9627
+      },
+      "4": {
+       "trafo_max": 104.4,
+       "line_max": 62.0,
+       "vmin": 0.9612
+      },
+      "6": {
+       "trafo_max": 112.8,
+       "line_max": 67.0,
+       "vmin": 0.9588
+      },
+      "13": {
+       "trafo_max": 123.9,
+       "line_max": 73.6,
+       "vmin": 0.9559
+      },
+      "27": {
+       "trafo_max": 157.8,
+       "line_max": 93.8,
+       "vmin": 0.9398
+      },
+      "55": {
+       "trafo_max": 253.4,
+       "line_max": 150.6,
+       "vmin": 0.8966
+      }
+     }
+    },
+    "oracle": {
+     "capacity": 18,
+     "next_breaks": [
+      "transformer"
+     ],
+     "peak_at_fix_pct": 193.9,
+     "probes": {
+      "0": {
+       "trafo_max": 77.0,
+       "line_max": 45.8,
+       "vmin": 0.9691
+      },
+      "13": {
+       "trafo_max": 86.4,
+       "line_max": 51.3,
+       "vmin": 0.9675
+      },
+      "16": {
+       "trafo_max": 92.5,
+       "line_max": 55.0,
+       "vmin": 0.9655
+      },
+      "18": {
+       "trafo_max": 99.1,
+       "line_max": 58.9,
+       "vmin": 0.9631
+      },
+      "19": {
+       "trafo_max": 101.8,
+       "line_max": 60.5,
+       "vmin": 0.9621
+      },
+      "20": {
+       "trafo_max": 107.1,
+       "line_max": 63.6,
+       "vmin": 0.9605
+      },
+      "27": {
+       "trafo_max": 122.1,
+       "line_max": 72.6,
+       "vmin": 0.9513
+      },
+      "55": {
+       "trafo_max": 193.9,
+       "line_max": 115.2,
+       "vmin": 0.9195
+      }
+     }
+    },
+    "method": {
+     "capacity": 8,
+     "next_breaks": [
+      "transformer"
+     ],
+     "peak_at_fix_pct": 220.2,
+     "probes": {
+      "0": {
+       "requested_kwh": 21.2,
+       "delivered_kwh": 20.0,
+       "est_down_ev_kw_sum": 0.0,
+       "est_down_ne_kw_sum": 265.8,
+       "true_ev_kwh": 0.0,
+       "true_flex_kwh": 219.8,
+       "trafo_max": 78.1,
+       "line_max": 46.4,
+       "vmin": 0.9687
+      },
+      "6": {
+       "requested_kwh": 25.7,
+       "delivered_kwh": 25.7,
+       "est_down_ev_kw_sum": 9.1,
+       "est_down_ne_kw_sum": 288.7,
+       "true_ev_kwh": 81.9,
+       "true_flex_kwh": 219.8,
+       "trafo_max": 92.2,
+       "line_max": 54.8,
+       "vmin": 0.9657
+      },
+      "7": {
+       "requested_kwh": 26.3,
+       "delivered_kwh": 26.3,
+       "est_down_ev_kw_sum": 9.1,
+       "est_down_ne_kw_sum": 292.9,
+       "true_ev_kwh": 95.1,
+       "true_flex_kwh": 219.8,
+       "trafo_max": 94.4,
+       "line_max": 56.1,
+       "vmin": 0.9651
+      },
+      "8": {
+       "requested_kwh": 27.0,
+       "delivered_kwh": 27.0,
+       "est_down_ev_kw_sum": 12.3,
+       "est_down_ne_kw_sum": 296.4,
+       "true_ev_kwh": 95.1,
+       "true_flex_kwh": 219.8,
+       "trafo_max": 99.5,
+       "line_max": 59.2,
+       "vmin": 0.9635
+      },
+      "9": {
+       "requested_kwh": 32.6,
+       "delivered_kwh": 31.0,
+       "est_down_ev_kw_sum": 14.7,
+       "est_down_ne_kw_sum": 299.9,
+       "true_ev_kwh": 131.1,
+       "true_flex_kwh": 219.8,
+       "trafo_max": 100.3,
+       "line_max": 59.6,
+       "vmin": 0.963
+      },
+      "13": {
+       "requested_kwh": 36.3,
+       "delivered_kwh": 36.3,
+       "est_down_ev_kw_sum": 18.3,
+       "est_down_ne_kw_sum": 308.6,
+       "true_ev_kwh": 150.9,
+       "true_flex_kwh": 219.8,
+       "trafo_max": 104.1,
+       "line_max": 61.9,
+       "vmin": 0.9619
+      },
+      "27": {
+       "requested_kwh": 43.7,
+       "delivered_kwh": 43.7,
+       "est_down_ev_kw_sum": 34.5,
+       "est_down_ne_kw_sum": 336.6,
+       "true_ev_kwh": 150.9,
+       "true_flex_kwh": 219.8,
+       "trafo_max": 136.8,
+       "line_max": 81.3,
+       "vmin": 0.9465
+      },
+      "55": {
+       "requested_kwh": 58.7,
+       "delivered_kwh": 58.7,
+       "est_down_ev_kw_sum": 73.0,
+       "est_down_ne_kw_sum": 398.0,
+       "true_ev_kwh": 269.7,
+       "true_flex_kwh": 219.8,
+       "trafo_max": 220.2,
+       "line_max": 130.9,
+       "vmin": 0.9092
+      }
+     }
+    }
+   }
+  },
+  {
+   "day": "2018-07-18",
+   "seed": 7,
+   "participation": 0.25,
+   "alpha": 6,
+   "oracle": 15,
+   "method": 13,
+   "peaks_at_fix_pct": {
+    "none": 210.9,
+    "oracle": 160.7,
+    "method": 190.1
+   },
+   "peak_score": 0.414,
+   "score": 0.778,
+   "cases": {
+    "none": {
+     "capacity": 6,
+     "next_breaks": [
+      "transformer"
+     ],
+     "peak_at_fix_pct": 210.9,
+     "probes": {
+      "0": {
+       "trafo_max": 85.2,
+       "line_max": 50.7,
+       "vmin": 0.9671
+      },
+      "6": {
+       "trafo_max": 99.3,
+       "line_max": 59.0,
+       "vmin": 0.9631
+      },
+      "7": {
+       "trafo_max": 105.0,
+       "line_max": 62.4,
+       "vmin": 0.9616
+      },
+      "9": {
+       "trafo_max": 110.3,
+       "line_max": 65.5,
+       "vmin": 0.9602
+      },
+      "13": {
+       "trafo_max": 118.7,
+       "line_max": 70.5,
+       "vmin": 0.9579
+      },
+      "27": {
+       "trafo_max": 147.0,
+       "line_max": 87.3,
+       "vmin": 0.9445
+      },
+      "55": {
+       "trafo_max": 210.9,
+       "line_max": 125.3,
+       "vmin": 0.918
+      }
+     }
+    },
+    "oracle": {
+     "capacity": 15,
+     "next_breaks": [
+      "transformer"
+     ],
+     "peak_at_fix_pct": 160.7,
+     "probes": {
+      "0": {
+       "trafo_max": 73.6,
+       "line_max": 43.7,
+       "vmin": 0.9685
+      },
+      "13": {
+       "trafo_max": 98.4,
+       "line_max": 58.5,
+       "vmin": 0.9613
+      },
+      "14": {
+       "trafo_max": 98.4,
+       "line_max": 58.5,
+       "vmin": 0.9613
+      },
+      "15": {
+       "trafo_max": 98.4,
+       "line_max": 58.5,
+       "vmin": 0.9613
+      },
+      "16": {
+       "trafo_max": 103.0,
+       "line_max": 61.2,
+       "vmin": 0.9613
+      },
+      "20": {
+       "trafo_max": 106.4,
+       "line_max": 63.2,
+       "vmin": 0.9578
+      },
+      "27": {
+       "trafo_max": 125.0,
+       "line_max": 74.3,
+       "vmin": 0.9518
+      },
+      "55": {
+       "trafo_max": 160.7,
+       "line_max": 95.5,
+       "vmin": 0.937
+      }
+     }
+    },
+    "method": {
+     "capacity": 13,
+     "next_breaks": [
+      "transformer"
+     ],
+     "peak_at_fix_pct": 190.1,
+     "probes": {
+      "0": {
+       "requested_kwh": 23.5,
+       "delivered_kwh": 21.7,
+       "est_down_ev_kw_sum": 0.0,
+       "est_down_ne_kw_sum": 249.6,
+       "true_ev_kwh": 0.0,
+       "true_flex_kwh": 238.5,
+       "trafo_max": 73.3,
+       "line_max": 43.6,
+       "vmin": 0.9686
+      },
+      "13": {
+       "requested_kwh": 26.4,
+       "delivered_kwh": 26.2,
+       "est_down_ev_kw_sum": 14.8,
+       "est_down_ne_kw_sum": 291.6,
+       "true_ev_kwh": 70.8,
+       "true_flex_kwh": 238.5,
+       "trafo_max": 98.3,
+       "line_max": 58.4,
+       "vmin": 0.9614
+      },
+      "14": {
+       "requested_kwh": 27.3,
+       "delivered_kwh": 25.9,
+       "est_down_ev_kw_sum": 17.8,
+       "est_down_ne_kw_sum": 294.6,
+       "true_ev_kwh": 70.8,
+       "true_flex_kwh": 238.5,
+       "trafo_max": 100.5,
+       "line_max": 59.7,
+       "vmin": 0.9614
+      },
+      "16": {
+       "requested_kwh": 27.6,
+       "delivered_kwh": 26.2,
+       "est_down_ev_kw_sum": 17.8,
+       "est_down_ne_kw_sum": 299.9,
+       "true_ev_kwh": 70.8,
+       "true_flex_kwh": 238.5,
+       "trafo_max": 106.1,
+       "line_max": 63.1,
+       "vmin": 0.9614
+      },
+      "20": {
+       "requested_kwh": 34.0,
+       "delivered_kwh": 32.3,
+       "est_down_ev_kw_sum": 28.7,
+       "est_down_ne_kw_sum": 306.1,
+       "true_ev_kwh": 70.8,
+       "true_flex_kwh": 238.5,
+       "trafo_max": 107.4,
+       "line_max": 63.9,
+       "vmin": 0.9578
+      },
+      "27": {
+       "requested_kwh": 33.5,
+       "delivered_kwh": 32.2,
+       "est_down_ev_kw_sum": 36.7,
+       "est_down_ne_kw_sum": 305.1,
+       "true_ev_kwh": 70.8,
+       "true_flex_kwh": 238.5,
+       "trafo_max": 129.4,
+       "line_max": 76.9,
+       "vmin": 0.9502
+      },
+      "55": {
+       "requested_kwh": 47.0,
+       "delivered_kwh": 47.0,
+       "est_down_ev_kw_sum": 73.1,
+       "est_down_ne_kw_sum": 369.1,
+       "true_ev_kwh": 265.8,
+       "true_flex_kwh": 238.5,
+       "trafo_max": 190.1,
+       "line_max": 113.0,
+       "vmin": 0.9252
+      }
+     }
+    }
+   }
+  },
+  {
+   "day": "2018-06-06",
+   "seed": 8,
+   "participation": 0.25,
+   "alpha": 8,
+   "oracle": 12,
+   "method": 12,
+   "peaks_at_fix_pct": {
+    "none": 221.0,
+    "oracle": 169.6,
+    "method": 204.5
+   },
+   "peak_score": 0.321,
+   "score": 1.0,
+   "cases": {
+    "none": {
+     "capacity": 8,
+     "next_breaks": [
+      "transformer"
+     ],
+     "peak_at_fix_pct": 221.0,
+     "probes": {
+      "0": {
+       "trafo_max": 76.3,
+       "line_max": 45.4,
+       "vmin": 0.9705
+      },
+      "6": {
+       "trafo_max": 94.9,
+       "line_max": 56.4,
+       "vmin": 0.9659
+      },
+      "7": {
+       "trafo_max": 96.1,
+       "line_max": 57.1,
+       "vmin": 0.9659
+      },
+      "8": {
+       "trafo_max": 98.7,
+       "line_max": 58.6,
+       "vmin": 0.9658
+      },
+      "9": {
+       "trafo_max": 101.3,
+       "line_max": 60.2,
+       "vmin": 0.965
+      },
+      "13": {
+       "trafo_max": 115.3,
+       "line_max": 68.5,
+       "vmin": 0.9617
+      },
+      "27": {
+       "trafo_max": 158.3,
+       "line_max": 94.1,
+       "vmin": 0.9407
+      },
+      "55": {
+       "trafo_max": 221.0,
+       "line_max": 131.3,
+       "vmin": 0.9137
+      }
+     }
+    },
+    "oracle": {
+     "capacity": 12,
+     "next_breaks": [
+      "transformer"
+     ],
+     "peak_at_fix_pct": 169.6,
+     "probes": {
+      "0": {
+       "trafo_max": 63.5,
+       "line_max": 37.7,
+       "vmin": 0.9757
+      },
+      "6": {
+       "trafo_max": 82.0,
+       "line_max": 48.7,
+       "vmin": 0.9711
+      },
+      "9": {
+       "trafo_max": 89.2,
+       "line_max": 53.0,
+       "vmin": 0.9685
+      },
+      "11": {
+       "trafo_max": 93.0,
+       "line_max": 55.3,
+       "vmin": 0.9669
+      },
+      "12": {
+       "trafo_max": 95.6,
+       "line_max": 56.8,
+       "vmin": 0.9662
+      },
+      "13": {
+       "trafo_max": 101.0,
+       "line_max": 60.0,
+       "vmin": 0.964
+      },
+      "27": {
+       "trafo_max": 126.1,
+       "line_max": 74.9,
+       "vmin": 0.9529
+      },
+      "55": {
+       "trafo_max": 169.6,
+       "line_max": 100.8,
+       "vmin": 0.9338
+      }
+     }
+    },
+    "method": {
+     "capacity": 12,
+     "next_breaks": [
+      "transformer"
+     ],
+     "peak_at_fix_pct": 204.5,
+     "probes": {
+      "0": {
+       "requested_kwh": 20.1,
+       "delivered_kwh": 20.0,
+       "est_down_ev_kw_sum": 0.0,
+       "est_down_ne_kw_sum": 132.5,
+       "true_ev_kwh": 0.0,
+       "true_flex_kwh": 143.9,
+       "trafo_max": 66.6,
+       "line_max": 39.6,
+       "vmin": 0.9744
+      },
+      "6": {
+       "requested_kwh": 20.7,
+       "delivered_kwh": 18.9,
+       "est_down_ev_kw_sum": 9.8,
+       "est_down_ne_kw_sum": 126.1,
+       "true_ev_kwh": 0.0,
+       "true_flex_kwh": 143.9,
+       "trafo_max": 86.3,
+       "line_max": 51.3,
+       "vmin": 0.9694
+      },
+      "9": {
+       "requested_kwh": 18.4,
+       "delivered_kwh": 16.2,
+       "est_down_ev_kw_sum": 14.5,
+       "est_down_ne_kw_sum": 131.7,
+       "true_ev_kwh": 0.0,
+       "true_flex_kwh": 143.9,
+       "trafo_max": 93.5,
+       "line_max": 55.5,
+       "vmin": 0.9667
+      },
+      "11": {
+       "requested_kwh": 12.2,
+       "delivered_kwh": 12.2,
+       "est_down_ev_kw_sum": 17.9,
+       "est_down_ne_kw_sum": 135.2,
+       "true_ev_kwh": 13.2,
+       "true_flex_kwh": 143.9,
+       "trafo_max": 97.8,
+       "line_max": 58.1,
+       "vmin": 0.965
+      },
+      "12": {
+       "requested_kwh": 13.3,
+       "delivered_kwh": 12.9,
+       "est_down_ev_kw_sum": 20.8,
+       "est_down_ne_kw_sum": 137.9,
+       "true_ev_kwh": 13.2,
+       "true_flex_kwh": 143.9,
+       "trafo_max": 99.9,
+       "line_max": 59.4,
+       "vmin": 0.9645
+      },
+      "13": {
+       "requested_kwh": 13.1,
+       "delivered_kwh": 12.7,
+       "est_down_ev_kw_sum": 23.7,
+       "est_down_ne_kw_sum": 135.9,
+       "true_ev_kwh": 13.2,
+       "true_flex_kwh": 143.9,
+       "trafo_max": 105.1,
+       "line_max": 62.4,
+       "vmin": 0.9627
+      },
+      "27": {
+       "requested_kwh": 16.0,
+       "delivered_kwh": 16.0,
+       "est_down_ev_kw_sum": 40.9,
+       "est_down_ne_kw_sum": 147.1,
+       "true_ev_kwh": 126.0,
+       "true_flex_kwh": 143.9,
+       "trafo_max": 144.8,
+       "line_max": 86.1,
+       "vmin": 0.947
+      },
+      "55": {
+       "requested_kwh": 18.6,
+       "delivered_kwh": 18.6,
+       "est_down_ev_kw_sum": 87.5,
+       "est_down_ne_kw_sum": 129.3,
+       "true_ev_kwh": 213.6,
+       "true_flex_kwh": 143.9,
+       "trafo_max": 204.5,
+       "line_max": 121.5,
+       "vmin": 0.9206
+      }
+     }
+    }
+   }
+  },
+  {
+   "day": "2018-06-23",
+   "seed": 9,
+   "participation": 0.25,
+   "alpha": 9,
+   "oracle": 12,
+   "method": 12,
+   "peaks_at_fix_pct": {
+    "none": 241.2,
+    "oracle": 200.9,
+    "method": 221.1
+   },
+   "peak_score": 0.499,
+   "score": 1.0,
+   "cases": {
+    "none": {
+     "capacity": 9,
+     "next_breaks": [
+      "transformer"
+     ],
+     "peak_at_fix_pct": 241.2,
+     "probes": {
+      "0": {
+       "trafo_max": 78.3,
+       "line_max": 46.5,
+       "vmin": 0.9694
+      },
+      "6": {
+       "trafo_max": 87.8,
+       "line_max": 52.2,
+       "vmin": 0.967
+      },
+      "9": {
+       "trafo_max": 99.2,
+       "line_max": 58.9,
+       "vmin": 0.9651
+      },
+      "10": {
+       "trafo_max": 104.9,
+       "line_max": 62.4,
+       "vmin": 0.9633
+      },
+      "11": {
+       "trafo_max": 107.6,
+       "line_max": 63.9,
+       "vmin": 0.9626
+      },
+      "13": {
+       "trafo_max": 118.1,
+       "line_max": 70.2,
+       "vmin": 0.96
+      },
+      "27": {
+       "trafo_max": 150.7,
+       "line_max": 89.6,
+       "vmin": 0.9468
+      },
+      "55": {
+       "trafo_max": 241.2,
+       "line_max": 143.4,
+       "vmin": 0.9056
+      }
+     }
+    },
+    "oracle": {
+     "capacity": 12,
+     "next_breaks": [
+      "transformer"
+     ],
+     "peak_at_fix_pct": 200.9,
+     "probes": {
+      "0": {
+       "trafo_max": 64.4,
+       "line_max": 38.3,
+       "vmin": 0.9754
+      },
+      "6": {
+       "trafo_max": 74.1,
+       "line_max": 44.0,
+       "vmin": 0.9721
+      },
+      "9": {
+       "trafo_max": 85.4,
+       "line_max": 50.7,
+       "vmin": 0.968
+      },
+      "11": {
+       "trafo_max": 93.7,
+       "line_max": 55.7,
+       "vmin": 0.9656
+      },
+      "12": {
+       "trafo_max": 99.0,
+       "line_max": 58.8,
+       "vmin": 0.9632
+      },
+      "13": {
+       "trafo_max": 104.2,
+       "line_max": 61.9,
+       "vmin": 0.9621
+      },
+      "27": {
+       "trafo_max": 131.1,
+       "line_max": 77.9,
+       "vmin": 0.9511
+      },
+      "55": {
+       "trafo_max": 200.9,
+       "line_max": 119.4,
+       "vmin": 0.9216
+      }
+     }
+    },
+    "method": {
+     "capacity": 12,
+     "next_breaks": [
+      "transformer"
+     ],
+     "peak_at_fix_pct": 221.1,
+     "probes": {
+      "0": {
+       "requested_kwh": 25.7,
+       "delivered_kwh": 25.4,
+       "est_down_ev_kw_sum": 0.0,
+       "est_down_ne_kw_sum": 181.5,
+       "true_ev_kwh": 0.0,
+       "true_flex_kwh": 198.4,
+       "trafo_max": 65.4,
+       "line_max": 38.9,
+       "vmin": 0.975
+      },
+      "6": {
+       "requested_kwh": 26.2,
+       "delivered_kwh": 25.7,
+       "est_down_ev_kw_sum": 7.8,
+       "est_down_ne_kw_sum": 186.1,
+       "true_ev_kwh": 19.8,
+       "true_flex_kwh": 198.4,
+       "trafo_max": 77.4,
+       "line_max": 46.0,
+       "vmin": 0.971
+      },
+      "9": {
+       "requested_kwh": 24.4,
+       "delivered_kwh": 23.4,
+       "est_down_ev_kw_sum": 13.4,
+       "est_down_ne_kw_sum": 196.4,
+       "true_ev_kwh": 19.8,
+       "true_flex_kwh": 198.4,
+       "trafo_max": 86.6,
+       "line_max": 51.5,
+       "vmin": 0.9679
+      },
+      "11": {
+       "requested_kwh": 25.1,
+       "delivered_kwh": 22.8,
+       "est_down_ev_kw_sum": 18.2,
+       "est_down_ne_kw_sum": 198.6,
+       "true_ev_kwh": 19.8,
+       "true_flex_kwh": 198.4,
+       "trafo_max": 95.3,
+       "line_max": 56.6,
+       "vmin": 0.9655
+      },
+      "12": {
+       "requested_kwh": 19.4,
+       "delivered_kwh": 19.4,
+       "est_down_ev_kw_sum": 18.2,
+       "est_down_ne_kw_sum": 201.0,
+       "true_ev_kwh": 19.8,
+       "true_flex_kwh": 198.4,
+       "trafo_max": 99.6,
+       "line_max": 59.2,
+       "vmin": 0.9633
+      },
+      "13": {
+       "requested_kwh": 18.7,
+       "delivered_kwh": 18.7,
+       "est_down_ev_kw_sum": 18.2,
+       "est_down_ne_kw_sum": 195.1,
+       "true_ev_kwh": 19.8,
+       "true_flex_kwh": 198.4,
+       "trafo_max": 105.1,
+       "line_max": 62.5,
+       "vmin": 0.9621
+      },
+      "27": {
+       "requested_kwh": 15.2,
+       "delivered_kwh": 12.7,
+       "est_down_ev_kw_sum": 39.0,
+       "est_down_ne_kw_sum": 136.7,
+       "true_ev_kwh": 79.2,
+       "true_flex_kwh": 198.4,
+       "trafo_max": 140.1,
+       "line_max": 83.3,
+       "vmin": 0.9487
+      },
+      "55": {
+       "requested_kwh": 42.1,
+       "delivered_kwh": 42.1,
+       "est_down_ev_kw_sum": 75.1,
+       "est_down_ne_kw_sum": 186.8,
+       "true_ev_kwh": 231.3,
+       "true_flex_kwh": 198.4,
+       "trafo_max": 221.1,
+       "line_max": 131.4,
+       "vmin": 0.912
+      }
+     }
+    }
+   }
+  }
+ ]
+}

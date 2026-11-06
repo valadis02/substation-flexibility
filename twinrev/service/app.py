@@ -10,7 +10,7 @@ max_pv_homes (out of 55 units), max_pv_scale_all_homes.
 import json, os, threading, traceback, uuid
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
-from typing import List, Optional
+from typing import Dict, List, Optional
 
 import pandas as pd
 from fastapi import FastAPI, HTTPException
@@ -223,6 +223,29 @@ def grid_day(req: GridRequest):
         _grid_cache.clear()
     _grid_cache[key] = out
     return out
+
+
+class PowerFlowRequest(BaseModel):
+    p_kw: Dict[str, List[float]] = Field(..., description="load point (lod_01 ... lod_55) -> 24 hourly kW; missing points get zero")
+    q_kvar: Dict[str, List[float]]
+
+
+@app.post("/power-flow")
+def power_flow(req: PowerFlowRequest):
+    """One power flow of 24 given hours on the twin (for experiments that build their own profiles): hourly state."""
+    bad = [k for k, v in {**req.p_kw, **req.q_kvar}.items() if len(v) != 24]
+    if bad or set(req.p_kw) != set(req.q_kvar):
+        raise HTTPException(400, f"need 24 values of P and Q for each load point (check {bad[:5]})")
+    P, Q = pd.DataFrame(req.p_kw), pd.DataFrame(req.q_kvar)
+    url, engine = _twinrev()
+    try:
+        with _twinrev_lock:
+            G.write_profiles(engine, G.profile_rows(P, Q, {k: k for k in P.columns}))
+            st = G.grid_state(G.run_pipeline(url))
+    except Exception as e:
+        raise HTTPException(502, f"TWIN-REV power flow failed: {type(e).__name__}: {e}")
+    return dict(trafo_kva=G.TRAFO_KVA, trafo_pct=st.trafo_loading_pct.tolist(), line_pct=st.max_line_loading_pct.tolist(),
+                vmin_pu=st.vmin_pu.tolist(), vmax_pu=st.vmax_pu.tolist(), busiest_line=st.busiest_line.tolist())
 
 
 @app.get("/grid/layout")

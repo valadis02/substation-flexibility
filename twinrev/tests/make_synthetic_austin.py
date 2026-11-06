@@ -48,6 +48,9 @@ def main(out, n_homes=25, n_ev=8, n_pv=12, seed=7, load_scale=1.0, pv_scale=1.0,
         A = pd.DataFrame({"ac": ac, "heater": heat, "dryer": dryer, "ev": ev, "solar": solar}, index=idx.tz_convert("UTC"))
         A.index.name = "timestamp"
         A.round(4).to_csv(os.path.join(out, f"appliances_{hid}.csv.gz"))
+    wx = pd.DataFrame({"temp": temp, "rh": 50.0, "cloud": 100 * (1 - cloud), "rad": 800 * clear * cloud, "is_day": (clear > 0).astype(int)}, index=idx.tz_convert("UTC"))
+    wx.index.name = "timestamp"
+    wx.round(3).to_csv(os.path.join(out, "weather.csv.gz"))             # the temperature the AC load was made from
     M = pd.DataFrame(W, index=idx.tz_convert("UTC")); M.index.name = "timestamp"
     M.round(4).to_csv(os.path.join(out, "mains.csv.gz"))
     open(os.path.join(out, "SYNTHETIC_NOT_REAL_DATA.txt"), "w").write(

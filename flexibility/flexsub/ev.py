@@ -37,7 +37,29 @@ import numpy as np
 import pandas as pd
 
 
-def ev_home(y, k=2.5, gate=0.02, max_cv=0.14, min_runs=5, window_days=14, q=0.6, weather_load=None, session_cv=False):
+def two_group_reference(y, k, window_days=14, min_days=7):
+    """Same-hour reference for the EV energy: the previous window_days of each hour are split in two groups at the largest
+    between-group variance (Otsu). If the groups are at least k kW apart (a charger's step), the reference is the median of
+    the lower group (days without charging), whatever the share of charging days. Otherwise the median of all days."""
+    ref = pd.Series(np.nan, index=y.index)
+    for _, s in y.groupby(y.index.hour):
+        v, out = s.values, np.full(len(s), np.nan)
+        for t in range(min_days, len(v)):
+            x = v[max(0, t - window_days):t]
+            x = np.sort(x[~np.isnan(x)])
+            if len(x) < min_days:
+                continue
+            n = len(x)
+            c = np.cumsum(x)
+            i = np.arange(1, n)
+            m1, m2 = c[:-1] / i, (c[-1] - c[:-1]) / (n - i)
+            j = int(np.argmax(i * (n - i) * (m1 - m2) ** 2))
+            out[t] = np.median(x[:j + 1]) if m2[j] - m1[j] >= k else np.median(x)
+        ref.loc[s.index] = out
+    return ref
+
+
+def ev_home(y, k=2.5, gate=0.02, max_cv=0.14, min_runs=5, window_days=14, q=0.6, weather_load=None, session_cv=False, core_strong=0.03):
     # session_cv=True (also drop non-flat runs one by one) was tested in T9c and rejected: EV energy x0.22
     """EV charging (kW) for one home from its own hourly load, after removing its weather-dependent load.
 
@@ -49,7 +71,9 @@ def ev_home(y, k=2.5, gate=0.02, max_cv=0.14, min_runs=5, window_days=14, q=0.6,
     `gate` of its hours (2% ~ half an hour a day) AND the power inside its runs is flat, as a charger's is: median over
     runs of >= 2 hours of the coefficient of variation of the hourly excess <= max_cv, over at least min_runs runs.
     Residual air conditioning and dryers cycle and fail this test (T9b: CV 0.15-0.22 vs <= 0.13 for EV homes;
-    max_cv set on Austin, checked on New York).
+    max_cv set on Austin, checked on New York). A home with EV-like hours of at least core_strong also passes: fast chargers
+    with short sessions have partly filled hours and a high CV (New York P1222, P5679). core_strong was set on Austin and New
+    York development homes (no-EV homes reach 0.027) and has not yet had an independent check.
     Returns (ev_kw, mask)."""
     if weather_load is not None:
         y = y - weather_load.reindex(y.index).fillna(0)
@@ -59,7 +83,8 @@ def ev_home(y, k=2.5, gate=0.02, max_cv=0.14, min_runs=5, window_days=14, q=0.6,
     mask = core | ((exc > k / 2) & (core.shift(1, fill_value=False) | core.shift(-1, fill_value=False)))
     rid = (core != core.shift()).cumsum()
     cvs = [g.std() / g.mean() for _, g in exc[core].groupby(rid[core]) if len(g) >= 2]
-    if core.mean() < gate or len(cvs) < min_runs or np.median(cvs) > max_cv:
+    flat = len(cvs) >= min_runs and np.median(cvs) <= max_cv
+    if core.mean() < gate or not (flat or core.mean() >= core_strong):
         mask = mask & False
     elif session_cv:                                      # also per session: drop runs that are not flat / only 1 h
         keep = pd.Series(False, index=core.index)
@@ -67,6 +92,11 @@ def ev_home(y, k=2.5, gate=0.02, max_cv=0.14, min_runs=5, window_days=14, q=0.6,
             if len(g) >= 2 and g.std() / g.mean() <= max_cv:
                 keep[g.index] = True
         core = keep
+        mask = core | ((exc > k / 2) & (core.shift(1, fill_value=False) | core.shift(-1, fill_value=False)))
+    if mask.any():                                        # how much: for accepted homes only, so no new false homes (T14)
+        ref = two_group_reference(y, k, window_days)
+        exc = y - ref
+        core = (exc > k) & ref.notna()
         mask = core | ((exc > k / 2) & (core.shift(1, fill_value=False) | core.shift(-1, fill_value=False)))
     return exc.clip(lower=0).where(mask, 0.0).where(ref.notna()), mask
 
